@@ -1,0 +1,78 @@
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: #0b0b0b;
+    color: #e5e5e5;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: #000;
+    border-bottom: 1px solid #222;
+}
+
+.logo {
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+.navbar a {
+    color: #c9a14a;
+    margin-left: 20px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.navbar a:hover {
+    color: #fff;
+}
+
+main {
+    padding: 40px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #222;
+    color: #777;
+}
+.car-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.car-card {
+    background: #111;
+    border: 1px solid #222;
+    padding: 20px;
+    border-radius: 12px;
+}
+
+.car-card h3 {
+    margin-top: 0;
+}
+
+.price {
+    color: #c9a14a;
+    font-weight: bold;
+}
+
+.view-btn {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    border: 1px solid #c9a14a;
+    color: #c9a14a;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.view-btn:hover {
+    background: #c9a14a;
+    color: #000;
+}
