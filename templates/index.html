@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Tomzkid Prestige Motors</h1>
+<p>Luxury Automotive Marketplace</p>
+
+<hr>
+
+{% if cars %}
+  {% for car in cars %}
+    <div style="margin-bottom:40px">
+      <h3>{{ car.name }}</h3>
+
+      <img src="/static/uploads/{{ car.image }}" width="350" loading="lazy">
+
+      <p><strong>₦{{ car.price_ngn }}</strong> | <strong>${{ car.price_usd }}</strong></p>
+      <p>{{ car.description }}</p>
+    </div>
+    <hr>
+  {% endfor %}
+{% else %}
+  <p>No vehicles listed yet.</p>
+{% endif %}
+
+{% endblock %}

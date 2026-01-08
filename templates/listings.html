@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Inventory | Tomzkid Prestige Motors{% endblock %}
+
+{% block content %}
+<h2>Available Inventory</h2>
+
+<div class="car-grid">
+    {% for car in cars %}
+    <div class="car-card">
+        <h3>{{ car.name }}</h3>
+        <p class="price">
+            ₦{{ "{:,}".format(car.price_ngn) }} |
+            ${{ "{:,}".format(car.price_usd) }}
+        </p>
+        <a class="view-btn" href="/car/{{ car.id }}">View Details</a>
+    </div>
+    {% else %}
+    <p>No vehicles available at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>Admin Dashboard</h2>
+<a href="/logout">Logout</a>
+
+<hr>
+
+<form method="post" enctype="multipart/form-data">
+  <input name="name" placeholder="Car name" required><br><br>
+  <input name="price_ngn" placeholder="Price (₦)" required><br><br>
+  <input name="price_usd" placeholder="Price ($)" required><br><br>
+  <textarea name="description" placeholder="Description" required></textarea><br><br>
+  <input type="file" name="image" required><br><br>
+  <button type="submit">Add Car</button>
+</form>
+
+<hr>
+
+<h3>Current Listings</h3>
+
+{% for car in cars %}
+  <div>
+    <p><strong>{{ car.name }}</strong></p>
+    <img src="/static/uploads/{{ car.image }}" width="250">
+    <p>₦{{ car.price_ngn }} | ${{ car.price_usd }}</p>
+    <p>{{ car.description }}</p>
+  </div>
+  <hr>
+{% endfor %}
+
+{% endblock %}
