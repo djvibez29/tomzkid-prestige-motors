@@ -76,3 +76,10 @@ footer {
     background: #c9a14a;
     color: #000;
 }
+
+.exchange-rate {
+  color: #c9a227; /* gold accent */
+  font-size: 0.9rem;
+  margin-top: 5px;
+  opacity: 0.85;
+}
