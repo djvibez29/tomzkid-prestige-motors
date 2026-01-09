@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -18,10 +18,10 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # ---------------- MODELS ----------------
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200))
-    price_usd = db.Column(db.Integer)  # USD is base
-    description = db.Column(db.Text)
-    image = db.Column(db.String(300))
+    name = db.Column(db.String(200), nullable=False)
+    price_usd = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(300), nullable=False)
 
 # ---------------- ADMIN (TEMP) ----------------
 ADMIN_USER = "OGTomzkid"
@@ -34,7 +34,6 @@ last_updated = None
 def get_usd_to_ngn_rate():
     global cached_rate, last_updated
 
-    # Update once per hour
     if cached_rate and last_updated:
         if datetime.datetime.now() - last_updated < datetime.timedelta(hours=1):
             return cached_rate
@@ -48,8 +47,7 @@ def get_usd_to_ngn_rate():
         cached_rate = data["rates"]["NGN"]
         last_updated = datetime.datetime.now()
     except:
-        # Fallback to current realistic rate
-        cached_rate = 1500
+        cached_rate = 1500  # fallback (current realistic rate)
         last_updated = datetime.datetime.now()
 
     return cached_rate
