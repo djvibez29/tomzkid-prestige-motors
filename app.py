@@ -87,3 +87,17 @@ def index():
                         car.price_ngn_calculated = round(car.price_usd * usd_to_ngn_rate, 2)
 
                             return render_template("index.html", cars=cars)
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from utils import cached_rate, last_updated
+
+def reset_rate():
+    global cached_rate, last_updated
+    cached_rate = None
+    last_updated = None
+    print("Weekly USD→NGN rate reset")
+
+scheduler = BackgroundScheduler()
+# Reset every Thursday at 00:00
+scheduler.add_job(reset_rate, 'cron', day_of_week='thu', hour=0)
+scheduler.start()
