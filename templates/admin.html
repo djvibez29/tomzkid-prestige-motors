@@ -8,10 +8,13 @@
 
 <form method="post" enctype="multipart/form-data">
   <input name="name" placeholder="Car name" required><br><br>
-  <input name="price_ngn" placeholder="Price (₦)" required><br><br>
-  <input name="price_usd" placeholder="Price ($)" required><br><br>
+
+  <input name="price_usd" placeholder="Price (USD)" required><br><br>
+
   <textarea name="description" placeholder="Description" required></textarea><br><br>
+
   <input type="file" name="image" required><br><br>
+
   <button type="submit">Add Car</button>
 </form>
 
@@ -21,10 +24,10 @@
 
 {% for car in cars %}
   <div>
-    <p><strong>{{ car.name }}</strong></p>
-    <img src="/static/uploads/{{ car.image }}" width="250">
-    <p>₦{{ car.price_ngn }} | ${{ car.price_usd }}</p>
-    <p>{{ car.description }}</p>
+    <strong>{{ car.name }}</strong><br>
+    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250"><br>
+    ${{ car.price_usd }}<br>
+    {{ car.description }}
   </div>
   <hr>
 {% endfor %}
