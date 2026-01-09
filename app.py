@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 
+
 app = Flask(__name__)
 app.secret_key = "change-this-later"
 
@@ -72,3 +73,17 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
     app.run()
+
+from utils import get_usd_to_ngn_rate
+
+@app.route("/")
+def index():
+    cars = Car.query.all()
+
+        usd_to_ngn_rate = get_usd_to_ngn_rate()
+
+            # Dynamically calculate Naira price
+                for car in cars:
+                        car.price_ngn_calculated = round(car.price_usd * usd_to_ngn_rate, 2)
+
+                            return render_template("index.html", cars=cars)
