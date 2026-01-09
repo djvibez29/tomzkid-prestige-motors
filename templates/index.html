@@ -23,3 +23,14 @@
 {% endif %}
 
 {% endblock %}
+
+{% for car in cars %}
+  <div class="vehicle-card">
+    <h3>{{ car.name }}</h3>
+    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="350">
+    <p>
+      Price: ${{ car.price_usd }} | ₦{{ "{:,}".format(car.price_ngn_calculated|int) }}
+    </p>
+    <p>{{ car.description }}</p>
+  </div>
+{% endfor %}
