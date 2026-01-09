@@ -2,5 +2,4 @@ Flask
 Flask-SQLAlchemy
 Werkzeug
 gunicorn
-APScheduler==3.10.4
 requests
