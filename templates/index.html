@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <h1>Tomzkid Prestige Motors</h1>
 
 <p class="exchange-rate">
-  Current USD→NGN rate: ₦{{ "{:,}".format(usd_to_ngn_rate|int) }}
+  Current USD → NGN rate: ₦{{ "{:,}".format(usd_to_ngn_rate|int) }}
 </p>
 
 <p>Luxury Automotive Marketplace</p>
@@ -13,13 +14,19 @@
 
 {% if cars %}
   {% for car in cars %}
-    <div class="car-card">
+    <div style="margin-bottom:40px">
       <h3>{{ car.name }}</h3>
 
-      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="350" loading="lazy">
+      <img
+        src="{{ url_for('static', filename='uploads/' ~ car.image) }}"
+        width="350"
+        loading="lazy"
+      >
 
-      <p class="price">
-        ${{ car.price_usd }} | ₦{{ "{:,}".format(car.price_ngn|int) }}
+      <p>
+        <strong>${{ car.price_usd }}</strong>
+        |
+        <strong>₦{{ "{:,}".format(car.price_ngn|int) }}</strong>
       </p>
 
       <p>{{ car.description }}</p>
