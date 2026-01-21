@@ -16,9 +16,22 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # ---------------- MODELS ----------------
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(200))
+
+    brand = db.Column(db.String(100))
+    model = db.Column(db.String(100))
+    year = db.Column(db.Integer)
+
+    body_type = db.Column(db.String(50))  # Sedan, Coupe, SUV, etc
+    mileage = db.Column(db.Integer)
+    transmission = db.Column(db.String(50))
+    drivetrain = db.Column(db.String(50))
+
+    exterior_color = db.Column(db.String(50))
+    interior_color = db.Column(db.String(50))
+
     price_usd = db.Column(db.Integer)
     description = db.Column(db.Text)
+
     image = db.Column(db.String(300))
 
 # ---------------- ADMIN (TEMP) ----------------
@@ -42,11 +55,20 @@ def admin():
         file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         car = Car(
-            name=request.form["name"],
+            brand=request.form["brand"],
+            model=request.form["model"],
+            year=request.form["year"],
+            body_type=request.form["body_type"],
+            mileage=request.form["mileage"],
+            transmission=request.form["transmission"],
+            drivetrain=request.form["drivetrain"],
+            exterior_color=request.form["exterior_color"],
+            interior_color=request.form["interior_color"],
             price_usd=request.form["price_usd"],
             description=request.form["description"],
             image=filename
         )
+
         db.session.add(car)
         db.session.commit()
         return redirect("/admin")
