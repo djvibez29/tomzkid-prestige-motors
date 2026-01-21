@@ -4,37 +4,24 @@ from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
-app.secret_key = "change-this-later"
+app.secret_key = "dev-secret-key"
 
-# Database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = "static/uploads"
 
 db = SQLAlchemy(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# ---------------- MODELS ----------------
+# ---------------- MODEL ----------------
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    price_usd = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(300), nullable=False)
 
-    brand = db.Column(db.String(100))
-    model = db.Column(db.String(100))
-    year = db.Column(db.Integer)
-
-    body_type = db.Column(db.String(50))  # Sedan, Coupe, SUV, etc
-    mileage = db.Column(db.Integer)
-    transmission = db.Column(db.String(50))
-    drivetrain = db.Column(db.String(50))
-
-    exterior_color = db.Column(db.String(50))
-    interior_color = db.Column(db.String(50))
-
-    price_usd = db.Column(db.Integer)
-    description = db.Column(db.Text)
-
-    image = db.Column(db.String(300))
-
-# ---------------- ADMIN (TEMP) ----------------
+# ---------------- ADMIN ----------------
 ADMIN_USER = "OGTomzkid"
 ADMIN_PASS = "Ajetomiwa29"
 
@@ -55,20 +42,11 @@ def admin():
         file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         car = Car(
-            brand=request.form["brand"],
-            model=request.form["model"],
-            year=request.form["year"],
-            body_type=request.form["body_type"],
-            mileage=request.form["mileage"],
-            transmission=request.form["transmission"],
-            drivetrain=request.form["drivetrain"],
-            exterior_color=request.form["exterior_color"],
-            interior_color=request.form["interior_color"],
+            name=request.form["name"],
             price_usd=request.form["price_usd"],
             description=request.form["description"],
             image=filename
         )
-
         db.session.add(car)
         db.session.commit()
         return redirect("/admin")
@@ -80,11 +58,15 @@ def admin():
 def login():
     error = None
     if request.method == "POST":
-        if request.form["username"] == ADMIN_USER and request.form["password"] == ADMIN_PASS:
+        if (
+            request.form["username"] == ADMIN_USER
+            and request.form["password"] == ADMIN_PASS
+        ):
             session["admin"] = True
             return redirect("/admin")
         else:
             error = "Invalid login"
+
     return render_template("login.html", error=error)
 
 @app.route("/logout")
@@ -92,8 +74,9 @@ def logout():
     session.clear()
     return redirect("/login")
 
-# ---------------- RUN ----------------
+# ---------------- INIT ----------------
+with app.app_context():
+    db.create_all()
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run()
+    app.run(debug=True)
