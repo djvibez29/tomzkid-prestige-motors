@@ -1,22 +1,35 @@
 {% extends "base.html" %}
-
 {% block content %}
+
 <h1>Tomzkid Prestige Motors</h1>
 <p>Luxury Automotive Marketplace</p>
 
 <hr>
 
 {% if cars %}
-  {% for car in cars %}
-    <div class="car-card">
-      <h3>{{ car.name }}</h3>
-      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="350">
-      <p><strong>${{ car.price_usd }}</strong></p>
-      <p>{{ car.description }}</p>
-    </div>
-    <hr>
-  {% endfor %}
+  <div class="car-grid">
+    {% for car in cars %}
+      <div class="car-card">
+        <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="100%">
+
+        <h3>{{ car.year }} {{ car.brand }} {{ car.model }}</h3>
+
+        <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
+
+        <p>
+          {{ car.body_type }} •
+          {{ car.transmission }} •
+          {{ "{:,}".format(car.mileage) }} miles
+        </p>
+
+        <p>{{ car.exterior_color }} / {{ car.interior_color }}</p>
+
+        <p>{{ car.description }}</p>
+      </div>
+    {% endfor %}
+  </div>
 {% else %}
   <p>No vehicles listed yet.</p>
 {% endif %}
+
 {% endblock %}
