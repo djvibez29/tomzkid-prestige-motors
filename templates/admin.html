@@ -7,15 +7,28 @@
 <hr>
 
 <form method="post" enctype="multipart/form-data">
-  <input name="name" placeholder="Car name" required><br><br>
 
-  <input name="price_usd" placeholder="Price (USD)" required><br><br>
+  <input name="brand" placeholder="Brand (e.g. Lamborghini)" required><br><br>
+  <input name="model" placeholder="Model (e.g. Huracan)" required><br><br>
+  <input name="year" type="number" placeholder="Year" required><br><br>
+
+  <input name="body_type" placeholder="Body Type (Coupe, SUV)" required><br><br>
+  <input name="mileage" type="number" placeholder="Mileage" required><br><br>
+
+  <input name="transmission" placeholder="Transmission (Auto / Manual)" required><br><br>
+  <input name="drivetrain" placeholder="Drivetrain (AWD / RWD)" required><br><br>
+
+  <input name="exterior_color" placeholder="Exterior Color" required><br><br>
+  <input name="interior_color" placeholder="Interior Color" required><br><br>
+
+  <input name="price_usd" type="number" placeholder="Price (USD)" required><br><br>
 
   <textarea name="description" placeholder="Description" required></textarea><br><br>
 
   <input type="file" name="image" required><br><br>
 
-  <button type="submit">Add Car</button>
+  <button type="submit">Add Vehicle</button>
+
 </form>
 
 <hr>
@@ -24,10 +37,9 @@
 
 {% for car in cars %}
   <div>
-    <strong>{{ car.name }}</strong><br>
-    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250"><br>
-    ${{ car.price_usd }}<br>
-    {{ car.description }}
+    <p><strong>{{ car.year }} {{ car.brand }} {{ car.model }}</strong></p>
+    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250">
+    <p>${{ "{:,}".format(car.price_usd) }}</p>
   </div>
   <hr>
 {% endfor %}
