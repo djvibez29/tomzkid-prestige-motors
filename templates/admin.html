@@ -8,22 +8,41 @@
 
 <form method="post" enctype="multipart/form-data">
 
-  <input name="brand" placeholder="Brand (e.g. Lamborghini)" required><br><br>
-  <input name="model" placeholder="Model (e.g. Huracan)" required><br><br>
+  <h3>Add New Vehicle</h3>
+
+  <input name="brand" placeholder="Brand" required><br><br>
+  <input name="model" placeholder="Model" required><br><br>
   <input name="year" type="number" placeholder="Year" required><br><br>
 
-  <input name="body_type" placeholder="Body Type (Coupe, SUV)" required><br><br>
-  <input name="mileage" type="number" placeholder="Mileage" required><br><br>
+  <label>Body Type</label><br>
+  <select name="body_type" required>
+    <option>Sedan</option>
+    <option>Coupe</option>
+    <option>Convertible</option>
+    <option>SUV</option>
+    <option>Truck</option>
+    <option>Off-road</option>
+  </select><br><br>
 
-  <input name="transmission" placeholder="Transmission (Auto / Manual)" required><br><br>
-  <input name="drivetrain" placeholder="Drivetrain (AWD / RWD)" required><br><br>
+  <input name="mileage" type="number" placeholder="Mileage (miles)" required><br><br>
+
+  <input name="transmission" placeholder="Transmission" required><br><br>
+  <input name="drivetrain" placeholder="Drivetrain" required><br><br>
+  <input name="engine" placeholder="Engine" required><br><br>
 
   <input name="exterior_color" placeholder="Exterior Color" required><br><br>
   <input name="interior_color" placeholder="Interior Color" required><br><br>
 
-  <input name="price_usd" type="number" placeholder="Price (USD)" required><br><br>
+  <input name="vin" placeholder="VIN" required><br><br>
+
+  <input name="price_usd" type="number" placeholder="Price ($)" required><br><br>
 
   <textarea name="description" placeholder="Description" required></textarea><br><br>
+
+  <label>
+    <input type="checkbox" name="featured">
+    Feature on homepage
+  </label><br><br>
 
   <input type="file" name="image" required><br><br>
 
@@ -36,12 +55,10 @@
 <h3>Current Listings</h3>
 
 {% for car in cars %}
-  <div>
-    <p><strong>{{ car.year }} {{ car.brand }} {{ car.model }}</strong></p>
-    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250">
-    <p>${{ "{:,}".format(car.price_usd) }}</p>
+  <div style="margin-bottom:20px">
+    <strong>{{ car.brand }} {{ car.model }}</strong> ({{ car.year }})<br>
+    ${{ car.price_usd }} | {{ car.body_type }}<br>
   </div>
-  <hr>
 {% endfor %}
 
 {% endblock %}
