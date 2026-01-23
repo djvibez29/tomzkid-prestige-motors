@@ -8,45 +8,54 @@
 
 <form method="post" enctype="multipart/form-data">
 
-  <h3>Add New Vehicle</h3>
+  <label>Brand</label><br>
+  <select name="brand">
+    <option value="">-- Select Brand --</option>
+    <option>Bentley</option>
+    <option>Rolls-Royce</option>
+    <option>Ferrari</option>
+    <option>Lamborghini</option>
+    <option>Porsche</option>
+    <option>Mercedes-Benz</option>
+    <option>BMW</option>
+    <option>McLaren</option>
+  </select>
 
-  <input name="brand" placeholder="Brand" required><br><br>
-  <input name="model" placeholder="Model" required><br><br>
+  <br><br>
+
+  <input name="custom_brand" placeholder="Other brand (optional)"><br><br>
+
+  <input name="name" placeholder="Model name" required><br><br>
+
   <input name="year" type="number" placeholder="Year" required><br><br>
 
   <label>Body Type</label><br>
-  <select name="body_type" required>
+  <select name="body_type">
     <option>Sedan</option>
     <option>Coupe</option>
     <option>Convertible</option>
     <option>SUV</option>
-    <option>Truck</option>
-    <option>Off-road</option>
-  </select><br><br>
+    <option>Off-Road</option>
+    <option>Hypercar</option>
+  </select>
 
-  <input name="mileage" type="number" placeholder="Mileage (miles)" required><br><br>
+  <br><br>
 
-  <input name="transmission" placeholder="Transmission" required><br><br>
-  <input name="drivetrain" placeholder="Drivetrain" required><br><br>
-  <input name="engine" placeholder="Engine" required><br><br>
-
-  <input name="exterior_color" placeholder="Exterior Color" required><br><br>
-  <input name="interior_color" placeholder="Interior Color" required><br><br>
-
-  <input name="vin" placeholder="VIN" required><br><br>
+  <input name="mileage_miles" type="number" placeholder="Mileage (miles)" required><br><br>
 
   <input name="price_usd" type="number" placeholder="Price ($)" required><br><br>
 
-  <textarea name="description" placeholder="Description" required></textarea><br><br>
+  <input name="transmission" placeholder="Transmission"><br><br>
 
-  <label>
-    <input type="checkbox" name="featured">
-    Feature on homepage
-  </label><br><br>
+  <input name="drivetrain" placeholder="Drivetrain"><br><br>
+
+  <input name="engine" placeholder="Engine"><br><br>
+
+  <textarea name="description" placeholder="Description"></textarea><br><br>
 
   <input type="file" name="image" required><br><br>
 
-  <button type="submit">Add Vehicle</button>
+  <button type="submit">Add Car</button>
 
 </form>
 
@@ -55,10 +64,13 @@
 <h3>Current Listings</h3>
 
 {% for car in cars %}
-  <div style="margin-bottom:20px">
-    <strong>{{ car.brand }} {{ car.model }}</strong> ({{ car.year }})<br>
-    ${{ car.price_usd }} | {{ car.body_type }}<br>
+  <div>
+    <p><strong>{{ car.brand or car.custom_brand }} {{ car.name }}</strong></p>
+    <p>{{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles</p>
+    <p>${{ car.price_usd }}</p>
+    <img src="/static/uploads/{{ car.image }}" width="250">
   </div>
+  <hr>
 {% endfor %}
 
 {% endblock %}
