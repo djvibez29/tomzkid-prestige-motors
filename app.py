@@ -13,7 +13,16 @@ app.config["UPLOAD_FOLDER"] = "static/uploads"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
+
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+# ---------------- AUTO RESET TABLES (TEMP FIX) ----------------
+with app.app_context():
+    try:
+        db.create_all()
+    except:
+        db.drop_all()
+        db.create_all()
 
 # ---------------- ROUTES ----------------
 
@@ -87,6 +96,4 @@ def logout():
 # ---------------- RUN ----------------
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run()
