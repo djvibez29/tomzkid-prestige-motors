@@ -1,28 +1,26 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Featured Inventory</h1>
+<h1>Inventory</h1>
 
 {% if cars %}
-  <div class="car-grid">
   {% for car in cars %}
     <div class="car-card">
 
-      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="100%">
+      <h3>{{ car.brand or car.custom_brand }} {{ car.name }}</h3>
 
-      <h3>{{ car.brand }} {{ car.model }} ({{ car.year }})</h3>
+      <img src="/static/uploads/{{ car.image }}" width="350">
+
+      <p>{{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles</p>
 
       <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
 
-      <p>{{ car.body_type }} • {{ car.mileage }} miles</p>
-
-      <p>{{ car.transmission }} • {{ car.drivetrain }}</p>
+      <p>{{ car.description }}</p>
 
     </div>
   {% endfor %}
-  </div>
 {% else %}
-  <p>No featured vehicles yet.</p>
+  <p>No vehicles listed yet.</p>
 {% endif %}
 
 {% endblock %}
