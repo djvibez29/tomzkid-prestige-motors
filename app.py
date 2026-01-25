@@ -97,3 +97,8 @@ def logout():
 
 if __name__ == "__main__":
     app.run()
+
+@app.route("/car/<int:car_id>")
+def car_detail(car_id):
+    car = Car.query.get_or_404(car_id)
+    return render_template("car_detail.html", car=car)
