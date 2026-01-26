@@ -3,24 +3,36 @@
 
 <h1>Inventory</h1>
 
-{% if cars %}
-  {% for car in cars %}
-    <div class="car-card">
+<div class="car-grid">
+
+{% for car in cars %}
+
+  <div class="car-card">
+
+    <a href="/car/{{ car.id }}">
+
+      <img src="/static/uploads/{{ car.image }}" loading="lazy">
 
       <h3>{{ car.brand or car.custom_brand }} {{ car.name }}</h3>
 
-      <img src="/static/uploads/{{ car.image }}" width="350">
+      <p class="meta">
+        {{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles
+      </p>
 
-      <p>{{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles</p>
+      <p class="price">
+        ${{ "{:,}".format(car.price_usd) }}
+      </p>
 
-      <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
+    </a>
 
-      <p>{{ car.description }}</p>
+  </div>
 
-    </div>
-  {% endfor %}
-{% else %}
-  <p>No vehicles listed yet.</p>
+{% endfor %}
+
+</div>
+
+{% if not cars %}
+<p>No vehicles listed yet.</p>
 {% endif %}
 
 {% endblock %}
