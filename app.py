@@ -75,6 +75,9 @@ def admin():
 
         file = request.files["image"]
 
+        if not file or file.filename == "":
+            return redirect("/admin")
+
         filename = secure_filename(file.filename)
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(save_path)
@@ -118,12 +121,7 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- DB INIT ----------------
+# ---------------- DB INIT (Render Safe) ----------------
 
-@app.before_first_request
-def init_db():
+with app.app_context():
     db.create_all()
-
-
-if __name__ == "__main__":
-    app.run()           
