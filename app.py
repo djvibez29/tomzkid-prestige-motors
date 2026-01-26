@@ -110,7 +110,6 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- DB INIT ----------------
-@app.before_first_request
-def init_db():
+# ---------------- DB INIT (SAFE FOR RENDER) ----------------
+with app.app_context():
     db.create_all()
