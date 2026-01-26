@@ -110,11 +110,7 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- RUN ----------------
-
-if __name__ == "__main__":
-    with app.app_context():
-    db.drop_all()
+# ---------------- DB INIT ----------------
+@app.before_first_request
+def init_db():
     db.create_all()
-
-    app.run(debug=True)
