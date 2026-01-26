@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="car-detail">
+
+  <div class="car-hero">
+    <img src="/static/uploads/{{ car.image }}">
+  </div>
+
+  <div class="car-info">
+
+    <h1>{{ car.brand or car.custom_brand }} {{ car.name }}</h1>
+
+    <p class="price">
+      ${{ "{:,}".format(car.price_usd) }}
+    </p>
+
+    <p class="meta">
+      {{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles
+    </p>
+
+    <hr>
+
+    <h3>Specifications</h3>
+
+    <ul class="specs">
+      <li><strong>Transmission:</strong> {{ car.transmission }}</li>
+      <li><strong>Drivetrain:</strong> {{ car.drivetrain }}</li>
+      <li><strong>Engine:</strong> {{ car.engine }}</li>
+    </ul>
+
+    <h3>Description</h3>
+    <p>{{ car.description }}</p>
+
+  </div>
+
+</div>
+
+{% endblock %}
