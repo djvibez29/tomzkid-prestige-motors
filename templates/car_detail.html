@@ -1,39 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="car-detail">
+<h1>{{ car.name }}</h1>
 
-  <div class="car-hero">
-    <img src="/static/uploads/{{ car.image }}">
-  </div>
+<img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="520">
 
-  <div class="car-info">
+<p><strong>Brand:</strong> {{ car.brand }}</p>
+<p><strong>Price:</strong> ${{ "{:,}".format(car.price_usd) }}</p>
+<p><strong>Miles:</strong> {{ "{:,}".format(car.miles) }}</p>
 
-    <h1>{{ car.brand or car.custom_brand }} {{ car.name }}</h1>
+<hr>
 
-    <p class="price">
-      ${{ "{:,}".format(car.price_usd) }}
-    </p>
+<p>{{ car.description }}</p>
 
-    <p class="meta">
-      {{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles
-    </p>
-
-    <hr>
-
-    <h3>Specifications</h3>
-
-    <ul class="specs">
-      <li><strong>Transmission:</strong> {{ car.transmission }}</li>
-      <li><strong>Drivetrain:</strong> {{ car.drivetrain }}</li>
-      <li><strong>Engine:</strong> {{ car.engine }}</li>
-    </ul>
-
-    <h3>Description</h3>
-    <p>{{ car.description }}</p>
-
-  </div>
-
-</div>
+<a href="/">← Back to inventory</a>
 
 {% endblock %}
