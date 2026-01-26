@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, abort
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
+
+# ---------------- APP SETUP ----------------
 
 app = Flask(__name__)
 app.secret_key = "change-this-later"
@@ -12,7 +14,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "d
 app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static/uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+# Upload limit (can increase later)
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB
+
 db = SQLAlchemy(app)
+
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # ---------------- MODELS ----------------
@@ -20,14 +26,14 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(200))
-    brand = db.Column(db.String(100))
+    name = db.Column(db.String(200), nullable=False)
+    brand = db.Column(db.String(100), nullable=False)
 
-    price_usd = db.Column(db.Integer)
-    miles = db.Column(db.Integer)
+    price_usd = db.Column(db.Integer, nullable=False)
+    miles = db.Column(db.Integer, nullable=False)
 
-    description = db.Column(db.Text)
-    image = db.Column(db.String(300))
+    description = db.Column(db.Text, nullable=False)
+    image = db.Column(db.String(300), nullable=False)
 
 
 # ---------------- ADMIN LOGIN ----------------
@@ -57,14 +63,6 @@ def index():
     return render_template("index.html", cars=cars)
 
 
-@app.route("/car/<int:car_id>")
-def car_detail(car_id):
-
-    car = Car.query.get_or_404(car_id)
-
-    return render_template("car_detail.html", car=car)
-
-
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
@@ -73,12 +71,16 @@ def admin():
 
     if request.method == "POST":
 
+        if "image" not in request.files:
+            abort(400, description="No image uploaded")
+
         file = request.files["image"]
 
-        if not file or file.filename == "":
-            return redirect("/admin")
+        if file.filename == "":
+            abort(400, description="No file selected")
 
         filename = secure_filename(file.filename)
+
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(save_path)
 
@@ -121,7 +123,14 @@ def logout():
     return redirect("/login")
 
 
-# ---------------- DB INIT (Render Safe) ----------------
+# ---------------- DB INIT ----------------
 
-with app.app_context():
+@app.before_first_request
+def init_db():
     db.create_all()
+
+
+# ---------------- RUN LOCAL ----------------
+
+if __name__ == "__main__":
+    app.run(debug=True)
