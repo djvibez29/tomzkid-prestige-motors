@@ -1,38 +1,68 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
 
-<h1>Inventory</h1>
+  <meta charset="UTF-8">
+  <title>Luxury Motors</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+
+</head>
+<body>
+
+<header class="site-header">
+  <h1>Luxury Inventory</h1>
+</header>
+
+
+<!-- ---------- PRICE FILTER BAR ---------- -->
+
+<form method="get" class="filter-bar">
+
+  <input 
+    type="number"
+    name="min_price"
+    placeholder="Min price ($)"
+    value="{{ request.args.get('min_price','') }}"
+  >
+
+  <input 
+    type="number"
+    name="max_price"
+    placeholder="Max price ($)"
+    value="{{ request.args.get('max_price','') }}"
+  >
+
+  <button type="submit">Apply Filter</button>
+
+</form>
+
+
+<!-- ---------- CAR GRID ---------- -->
 
 <div class="car-grid">
 
-{% for car in cars %}
+  {% for car in cars %}
 
   <div class="car-card">
 
-    <a href="/car/{{ car.id }}">
+    <img src="/static/uploads/{{ car.image }}" alt="{{ car.name }}">
 
-      <img src="/static/uploads/{{ car.image }}" loading="lazy">
+    <h3>{{ car.name }}</h3>
 
-      <h3>{{ car.brand or car.custom_brand }} {{ car.name }}</h3>
+    <p class="brand">{{ car.brand }}</p>
 
-      <p class="meta">
-        {{ car.year }} • {{ car.body_type }} • {{ car.mileage_miles }} miles
-      </p>
+    <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
 
-      <p class="price">
-        ${{ "{:,}".format(car.price_usd) }}
-      </p>
+    <p class="miles">{{ "{:,}".format(car.miles) }} miles</p>
 
-    </a>
+    <p class="desc">{{ car.description }}</p>
 
   </div>
 
-{% endfor %}
+  {% endfor %}
 
 </div>
 
-{% if not cars %}
-<p>No vehicles listed yet.</p>
-{% endif %}
-
-{% endblock %}
+</body>
+</html>
