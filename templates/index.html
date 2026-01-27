@@ -1,41 +1,37 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1>Inventory</h1>
+<h1>Tomzkid Prestige Motors</h1>
+<p>Luxury Automotive Marketplace</p>
 
+<hr>
+
+<!-- Price Filter Form -->
 <form method="get">
-  <input type="number" name="min_price" placeholder="Min price">
-  <input type="number" name="max_price" placeholder="Max price">
-  <button type="submit">Filter</button>
+    <label>Min Price ($): <input type="number" name="min_price" value="{{ request.args.get('min_price', '') }}"></label>
+    <label>Max Price ($): <input type="number" name="max_price" value="{{ request.args.get('max_price', '') }}"></label>
+    <button type="submit">Filter</button>
 </form>
 
 <hr>
 
-<div class="car-grid">
-
-{% for car in cars %}
-
-  <a href="/car/{{ car.id }}" style="text-decoration:none;color:inherit;">
-
+{% if cars %}
+  <div class="car-grid">
+  {% for car in cars %}
     <div class="car-card">
-
-      <img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="100%">
-
-      <h3>{{ car.name }}</h3>
-
-      <p>{{ car.brand }}</p>
-
-      <p class="price">${{ car.price_usd }}</p>
-
-      <p>Miles: {{ car.miles }}</p>
-
+        <h3>{{ car.name }}</h3>
+        {% if car.brand %}
+            <p><strong>Brand:</strong> {{ car.brand }}</p>
+        {% endif %}
+        <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="350" loading="lazy">
+        <p><strong>Price:</strong> ${{ car.price_usd }}</p>
+        <p><strong>Miles:</strong> {{ car.miles }}</p>
+        <p>{{ car.description }}</p>
     </div>
-
-  </a>
-
-{% endfor %}
-
-</div>
+  {% endfor %}
+  </div>
+{% else %}
+  <p>No vehicles listed yet.</p>
+{% endif %}
 
 {% endblock %}
