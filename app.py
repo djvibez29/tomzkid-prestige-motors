@@ -1,96 +1,66 @@
-from flask import Flask, render_template, request, redirect, session, abort
+from flask import Flask, render_template, request, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 
-# ---------------- APP SETUP ----------------
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
 app.secret_key = "change-this-later"
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
-app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static/uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Upload limit (can increase later)
-app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16MB
+app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static/uploads")
 
 db = SQLAlchemy(app)
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-# ---------------- MODELS ----------------
+# ---------------- MODEL ----------------
 
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     name = db.Column(db.String(200), nullable=False)
-    brand = db.Column(db.String(100), nullable=False)
+    brand = db.Column(db.String(100))
+    price_usd = db.Column(db.Integer)
+    miles = db.Column(db.Integer)
+    description = db.Column(db.Text)
+    image = db.Column(db.String(300))
 
-    price_usd = db.Column(db.Integer, nullable=False)
-    miles = db.Column(db.Integer, nullable=False)
-
-    description = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(300), nullable=False)
-
-
-# ---------------- ADMIN LOGIN ----------------
+# ---------------- ADMIN ----------------
 
 ADMIN_USER = "OGTomzkid"
 ADMIN_PASS = "Ajetomiwa29"
-
 
 # ---------------- ROUTES ----------------
 
 @app.route("/")
 def index():
-
-    min_price = request.args.get("min_price", type=int)
-    max_price = request.args.get("max_price", type=int)
-
-    query = Car.query
-
-    if min_price:
-        query = query.filter(Car.price_usd >= min_price)
-
-    if max_price:
-        query = query.filter(Car.price_usd <= max_price)
-
-    cars = query.all()
-
+    cars = Car.query.all()
     return render_template("index.html", cars=cars)
-
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
-
     if not session.get("admin"):
         return redirect("/login")
 
     if request.method == "POST":
+        file = request.files.get("image")
 
-        if "image" not in request.files:
-            abort(400, description="No image uploaded")
-
-        file = request.files["image"]
-
-        if file.filename == "":
-            abort(400, description="No file selected")
+        if not file:
+            return "No file uploaded", 400
 
         filename = secure_filename(file.filename)
-
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(save_path)
+        path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(path)
 
         car = Car(
-            name=request.form["name"],
-            brand=request.form["brand"],
-            price_usd=int(request.form["price_usd"]),
-            miles=int(request.form["miles"]),
-            description=request.form["description"],
-            image=filename
+            name=request.form.get("name"),
+            brand=request.form.get("brand"),
+            price_usd=request.form.get("price_usd"),
+            miles=request.form.get("miles"),
+            description=request.form.get("description"),
+            image=filename,
         )
 
         db.session.add(car)
@@ -101,36 +71,24 @@ def admin():
     cars = Car.query.all()
     return render_template("admin.html", cars=cars)
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
-
         if (
-            request.form["username"] == ADMIN_USER
-            and request.form["password"] == ADMIN_PASS
+            request.form.get("username") == ADMIN_USER
+            and request.form.get("password") == ADMIN_PASS
         ):
             session["admin"] = True
             return redirect("/admin")
 
     return render_template("login.html")
 
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect("/login")
 
+# ---------------- INIT ----------------
 
-# ---------------- DB INIT ----------------
-
-@app.before_first_request
-def init_db():
+with app.app_context():
     db.create_all()
-
-
-# ---------------- RUN LOCAL ----------------
-
-if __name__ == "__main__":
-    app.run(debug=True)
