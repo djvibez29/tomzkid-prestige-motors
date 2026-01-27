@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+
 {% block content %}
 
 <h1>Inventory</h1>
 
-<form method="get" class="filter-bar">
-  <input type="number" name="min_price" placeholder="Min price ($)">
-  <input type="number" name="max_price" placeholder="Max price ($)">
+<form method="get">
+  <input type="number" name="min_price" placeholder="Min price">
+  <input type="number" name="max_price" placeholder="Max price">
   <button type="submit">Filter</button>
 </form>
 
@@ -13,25 +14,27 @@
 
 <div class="car-grid">
 
-{% if cars %}
-  {% for car in cars %}
-    <a href="/car/{{ car.id }}" class="car-card">
+{% for car in cars %}
 
-      <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+  <a href="/car/{{ car.id }}" style="text-decoration:none;color:inherit;">
+
+    <div class="car-card">
+
+      <img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="100%">
 
       <h3>{{ car.name }}</h3>
 
-      <p class="price">
-        ${{ "{:,}".format(car.price_usd) }}
-      </p>
-
       <p>{{ car.brand }}</p>
 
-    </a>
-  {% endfor %}
-{% else %}
-  <p>No vehicles listed yet.</p>
-{% endif %}
+      <p class="price">${{ car.price_usd }}</p>
+
+      <p>Miles: {{ car.miles }}</p>
+
+    </div>
+
+  </a>
+
+{% endfor %}
 
 </div>
 
