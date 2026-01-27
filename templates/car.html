@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="car-card">
+
+  <h1>{{ car.name }}</h1>
+  <p class="brand">{{ car.brand }}</p>
+
+  <img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="600">
+
+  <h2 class="price">${{ car.price_usd }}</h2>
+
+  <p><strong>Miles:</strong> {{ car.miles }}</p>
+
+  <p>{{ car.description }}</p>
+
+  <a href="/" class="view-btn">← Back to listings</a>
+
+</div>
+
+{% endblock %}
