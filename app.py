@@ -13,7 +13,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
 app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static", "uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
 
 db = SQLAlchemy(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -41,8 +41,47 @@ ADMIN_PASS = "Ajetomiwa29"
 
 @app.route("/")
 def index():
-    cars = Car.query.order_by(Car.id.desc()).all()
-    return render_template("index.html", cars=cars)
+
+    min_price = request.args.get("min_price", type=int)
+    max_price = request.args.get("max_price", type=int)
+    brand = request.args.get("brand")
+    max_miles = request.args.get("max_miles", type=int)
+
+    query = Car.query
+
+    if min_price:
+        query = query.filter(Car.price_usd >= min_price)
+
+    if max_price:
+        query = query.filter(Car.price_usd <= max_price)
+
+    if brand:
+        query = query.filter(Car.brand == brand)
+
+    if max_miles:
+        query = query.filter(Car.miles <= max_miles)
+
+    cars = query.order_by(Car.id.desc()).all()
+
+    brands = [b[0] for b in db.session.query(Car.brand).distinct()]
+
+    return render_template(
+        "index.html",
+        cars=cars,
+        brands=brands,
+    )
+
+
+@app.route("/brand/<brand_name>")
+def brand_page(brand_name):
+
+    cars = Car.query.filter_by(brand=brand_name).all()
+
+    return render_template(
+        "brand.html",
+        cars=cars,
+        brand=brand_name,
+    )
 
 
 @app.route("/car/<int:car_id>")
@@ -57,24 +96,28 @@ def admin():
     if not session.get("admin"):
         return redirect(url_for("login"))
 
+    brands = [b[0] for b in db.session.query(Car.brand).distinct()]
+
     if request.method == "POST":
 
-        if "image" not in request.files:
+        file = request.files.get("image")
+
+        if not file or file.filename == "":
             abort(400, "Missing image")
-
-        file = request.files["image"]
-
-        if file.filename == "":
-            abort(400, "No file selected")
 
         filename = secure_filename(file.filename)
 
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(save_path)
 
+        brand = request.form.get("brand")
+        custom_brand = request.form.get("custom_brand")
+
+        final_brand = custom_brand if custom_brand else brand
+
         car = Car(
             name=request.form["name"],
-            brand=request.form["brand"],
+            brand=final_brand,
             price_usd=int(request.form["price_usd"]),
             miles=int(request.form["miles"]),
             description=request.form["description"],
@@ -86,8 +129,13 @@ def admin():
 
         return redirect(url_for("admin"))
 
-    cars = Car.query.all()
-    return render_template("admin.html", cars=cars)
+    cars = Car.query.order_by(Car.id.desc()).all()
+
+    return render_template(
+        "admin.html",
+        cars=cars,
+        brands=brands,
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
