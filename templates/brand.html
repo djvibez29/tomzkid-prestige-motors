@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>{{ brand }}</h2>
+
+<div class="car-grid">
+
+{% for car in cars %}
+  <div class="car-card">
+
+    <a href="{{ url_for('car_detail', car_id=car.id) }}">
+      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="300">
+    </a>
+
+    <h3>{{ car.name }}</h3>
+    <p>${{ car.price_usd }}</p>
+
+  </div>
+{% endfor %}
+
+</div>
+
+{% endblock %}
