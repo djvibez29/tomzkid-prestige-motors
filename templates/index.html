@@ -6,32 +6,72 @@
 
 <hr>
 
-<!-- Price Filter Form -->
-<form method="get">
-    <label>Min Price ($): <input type="number" name="min_price" value="{{ request.args.get('min_price', '') }}"></label>
-    <label>Max Price ($): <input type="number" name="max_price" value="{{ request.args.get('max_price', '') }}"></label>
-    <button type="submit">Filter</button>
+<form method="get" class="filter-bar">
+
+  <label>Body Type:</label>
+  <select name="body_type">
+    <option value="">All</option>
+    <option>Sedan</option>
+    <option>Coupe</option>
+    <option>Convertible</option>
+    <option>SUV</option>
+    <option>4x4</option>
+    <option>6x6</option>
+  </select>
+
+  <label>Brand:</label>
+  <select name="brand">
+    <option value="">All</option>
+    <option>BMW</option>
+    <option>Mercedes</option>
+    <option>Ferrari</option>
+    <option>Lamborghini</option>
+    <option>Rolls-Royce</option>
+    <option>Bentley</option>
+  </select>
+
+  <input type="text" name="brand_custom" placeholder="Or type brand">
+
+  <label>Min Price ($)</label>
+  <input type="number" name="min_price">
+
+  <label>Max Price ($)</label>
+  <input type="number" name="max_price">
+
+  <button type="submit">Apply Filters</button>
+
 </form>
 
 <hr>
 
-{% if cars %}
-  <div class="car-grid">
-  {% for car in cars %}
-    <div class="car-card">
-        <h3>{{ car.name }}</h3>
-        {% if car.brand %}
-            <p><strong>Brand:</strong> {{ car.brand }}</p>
-        {% endif %}
-        <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="350" loading="lazy">
-        <p><strong>Price:</strong> ${{ car.price_usd }}</p>
-        <p><strong>Miles:</strong> {{ car.miles }}</p>
-        <p>{{ car.description }}</p>
-    </div>
-  {% endfor %}
-  </div>
-{% else %}
-  <p>No vehicles listed yet.</p>
+<div class="car-grid">
+
+{% for car in cars %}
+<a href="{{ url_for('car_detail', car_id=car.id) }}" class="car-card-link">
+
+<div class="car-card">
+
+  <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="320">
+
+  <h3>{{ car.name }}</h3>
+
+  <p><strong>{{ car.brand }}</strong> — {{ car.body_type }}</p>
+
+  <p class="price">${{ car.price_usd }}</p>
+
+  <p>Miles: {{ car.miles }}</p>
+
+  <p>{{ car.description|truncate(120) }}</p>
+
+</div>
+
+</a>
+{% endfor %}
+
+</div>
+
+{% if not cars %}
+<p>No vehicles found.</p>
 {% endif %}
 
 {% endblock %}
