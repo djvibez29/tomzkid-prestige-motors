@@ -1,22 +1,16 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="car-card">
+<h2>{{ car.name }}</h2>
 
-  <h1>{{ car.name }}</h1>
-  <p class="brand">{{ car.brand }}</p>
+<img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="500">
 
-  <img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="600">
+<p><strong>Brand:</strong> {{ car.brand }}</p>
+<p><strong>Price:</strong> ${{ car.price_usd }}</p>
+<p><strong>Miles:</strong> {{ car.miles }}</p>
 
-  <h2 class="price">${{ car.price_usd }}</h2>
+<p>{{ car.description }}</p>
 
-  <p><strong>Miles:</strong> {{ car.miles }}</p>
-
-  <p>{{ car.description }}</p>
-
-  <a href="/" class="view-btn">← Back to listings</a>
-
-</div>
+<a href="/">← Back to inventory</a>
 
 {% endblock %}
