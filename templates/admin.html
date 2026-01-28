@@ -10,15 +10,26 @@
 
   <input name="name" placeholder="Car name" required><br><br>
 
-  <input name="brand" placeholder="Brand" required><br><br>
+  <label>Brand:</label><br>
+  <select name="brand">
+    {% for b in brands %}
+      <option value="{{ b }}">{{ b }}</option>
+    {% endfor %}
+  </select>
 
-  <input name="price_usd" type="number" placeholder="Price ($)" required><br><br>
+  <br><br>
 
-  <input name="miles" type="number" placeholder="Miles" required><br><br>
+  <input name="custom_brand" placeholder="Or type new brand"><br><br>
 
-  <textarea name="description" rows="6" placeholder="Description" required></textarea><br><br>
+  <input name="price_usd" placeholder="Price ($)" required><br><br>
 
-  <input type="file" name="image" accept="image/*" required><br><br>
+  <input name="miles" placeholder="Mileage" required><br><br>
+
+  <textarea name="description" rows="10" placeholder="Full description" required></textarea>
+
+  <br><br>
+
+  <input type="file" name="image" required><br><br>
 
   <button type="submit">Add Vehicle</button>
 
@@ -31,9 +42,8 @@
 {% for car in cars %}
   <div>
     <p><strong>{{ car.name }}</strong> — {{ car.brand }}</p>
-    <img src="/static/uploads/{{ car.image }}" width="250">
+    <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250">
     <p>${{ car.price_usd }} | {{ car.miles }} miles</p>
-    <p>{{ car.description }}</p>
   </div>
   <hr>
 {% endfor %}
