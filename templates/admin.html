@@ -3,51 +3,39 @@
 
 <h2>Admin Dashboard</h2>
 <a href="/logout">Logout</a>
+
 <hr>
 
-<!-- Add New Car Form -->
 <form method="post" enctype="multipart/form-data">
-    <label>Name:</label><br>
-    <input name="name" placeholder="Car Name" required><br><br>
 
-    <label>Brand:</label><br>
-    <input name="brand" placeholder="Brand" required><br><br>
+  <input name="name" placeholder="Car name" required><br><br>
 
-    <label>Price ($):</label><br>
-    <input name="price_usd" type="number" placeholder="Price in USD" required><br><br>
+  <input name="brand" placeholder="Brand" required><br><br>
 
-    <label>Miles:</label><br>
-    <input name="miles" type="number" placeholder="Miles" required><br><br>
+  <input name="price_usd" type="number" placeholder="Price ($)" required><br><br>
 
-    <label>Description:</label><br>
-    <textarea name="description" rows="6" placeholder="Description" required></textarea><br><br>
+  <input name="miles" type="number" placeholder="Miles" required><br><br>
 
-    <label>Upload Image:</label><br>
-    <input type="file" name="image" required><br><br>
+  <textarea name="description" rows="6" placeholder="Description" required></textarea><br><br>
 
-    <button type="submit">Add Car</button>
+  <input type="file" name="image" accept="image/*" required><br><br>
+
+  <button type="submit">Add Vehicle</button>
+
 </form>
 
 <hr>
 
 <h3>Current Listings</h3>
-{% if cars %}
-    <div class="car-grid">
-    {% for car in cars %}
-        <div class="car-card">
-            <h3>{{ car.name }}</h3>
-            {% if car.brand %}
-                <p><strong>Brand:</strong> {{ car.brand }}</p>
-            {% endif %}
-            <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="250">
-            <p><strong>Price:</strong> ${{ car.price_usd }}</p>
-            <p><strong>Miles:</strong> {{ car.miles }}</p>
-            <p>{{ car.description }}</p>
-        </div>
-    {% endfor %}
-    </div>
-{% else %}
-    <p>No vehicles listed yet.</p>
-{% endif %}
+
+{% for car in cars %}
+  <div>
+    <p><strong>{{ car.name }}</strong> — {{ car.brand }}</p>
+    <img src="/static/uploads/{{ car.image }}" width="250">
+    <p>${{ car.price_usd }} | {{ car.miles }} miles</p>
+    <p>{{ car.description }}</p>
+  </div>
+  <hr>
+{% endfor %}
 
 {% endblock %}
