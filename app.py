@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, session, abort
+from flask import Flask, render_template, request, redirect, session, abort, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
 
-# ---------------- APP SETUP ----------------
+# ---------------- APP ----------------
 
 app = Flask(__name__)
 app.secret_key = "change-this-later"
@@ -13,9 +13,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
 app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static", "uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-# Allow uploads up to 50MB (future proof for videos later)
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 db = SQLAlchemy(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -32,10 +30,9 @@ class Car(db.Model):
     miles = db.Column(db.Integer, nullable=False)
 
     description = db.Column(db.Text, nullable=False)
-
     image = db.Column(db.String(300), nullable=False)
 
-# ---------------- ADMIN LOGIN ----------------
+# ---------------- ADMIN ----------------
 
 ADMIN_USER = "OGTomzkid"
 ADMIN_PASS = "Ajetomiwa29"
@@ -44,21 +41,26 @@ ADMIN_PASS = "Ajetomiwa29"
 
 @app.route("/")
 def index():
-    cars = Car.query.all()
+    cars = Car.query.order_by(Car.id.desc()).all()
     return render_template("index.html", cars=cars)
+
+
+@app.route("/car/<int:car_id>")
+def car_detail(car_id):
+    car = Car.query.get_or_404(car_id)
+    return render_template("car.html", car=car)
 
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
     if not session.get("admin"):
-        return redirect("/login")
+        return redirect(url_for("login"))
 
     if request.method == "POST":
 
-        # --- HARD VALIDATION ---
         if "image" not in request.files:
-            abort(400, "Image missing from form")
+            abort(400, "Missing image")
 
         file = request.files["image"]
 
@@ -70,25 +72,19 @@ def admin():
         save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
         file.save(save_path)
 
-        try:
-            car = Car(
-                name=request.form["name"],
-                brand=request.form["brand"],
-                price_usd=int(request.form["price_usd"]),
-                miles=int(request.form["miles"]),
-                description=request.form["description"],
-                image=filename
-            )
+        car = Car(
+            name=request.form["name"],
+            brand=request.form["brand"],
+            price_usd=int(request.form["price_usd"]),
+            miles=int(request.form["miles"]),
+            description=request.form["description"],
+            image=filename,
+        )
 
-            db.session.add(car)
-            db.session.commit()
+        db.session.add(car)
+        db.session.commit()
 
-        except Exception as e:
-            db.session.rollback()
-            print("UPLOAD ERROR:", e)
-            abort(500)
-
-        return redirect("/admin")
+        return redirect(url_for("admin"))
 
     cars = Car.query.all()
     return render_template("admin.html", cars=cars)
@@ -103,7 +99,7 @@ def login():
             and request.form["password"] == ADMIN_PASS
         ):
             session["admin"] = True
-            return redirect("/admin")
+            return redirect(url_for("admin"))
 
     return render_template("login.html")
 
@@ -111,7 +107,7 @@ def login():
 @app.route("/logout")
 def logout():
     session.clear()
-    return redirect("/login")
+    return redirect(url_for("login"))
 
 
 # ---------------- DB INIT ----------------
