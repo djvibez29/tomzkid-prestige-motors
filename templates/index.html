@@ -2,34 +2,49 @@
 {% block content %}
 
 <h1>Tomzkid Prestige Motors</h1>
-<p>Luxury Automotive Marketplace</p>
+
+<form method="get">
+
+  <select name="brand">
+    <option value="">All Brands</option>
+    {% for b in brands %}
+      <option value="{{ b }}">{{ b }}</option>
+    {% endfor %}
+  </select>
+
+  <input name="min_price" placeholder="Min $" type="number">
+  <input name="max_price" placeholder="Max $" type="number">
+
+  <input name="max_miles" placeholder="Max Miles" type="number">
+
+  <button type="submit">Filter</button>
+
+</form>
 
 <hr>
 
-{% if cars %}
-  <div class="car-grid">
-  {% for car in cars %}
-    <div class="car-card">
+<div class="car-grid">
 
-      <a href="{{ url_for('car_detail', car_id=car.id) }}">
-        <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="300">
-      </a>
+{% for car in cars %}
+  <div class="car-card">
 
-      <h3>{{ car.name }}</h3>
-      <p>{{ car.brand }}</p>
+    <a href="{{ url_for('car_detail', car_id=car.id) }}">
+      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="300">
+    </a>
 
-      <p class="price">${{ car.price_usd }}</p>
-      <p>{{ car.miles }} miles</p>
+    <h3>{{ car.name }}</h3>
+    <p>{{ car.brand }}</p>
 
-      <a class="view-btn" href="{{ url_for('car_detail', car_id=car.id) }}">
-        View Details
-      </a>
+    <p class="price">${{ car.price_usd }}</p>
+    <p>{{ car.miles }} miles</p>
 
-    </div>
-  {% endfor %}
+    <a class="view-btn" href="{{ url_for('car_detail', car_id=car.id) }}">
+      View Details
+    </a>
+
   </div>
-{% else %}
-  <p>No vehicles listed yet.</p>
-{% endif %}
+{% endfor %}
+
+</div>
 
 {% endblock %}
