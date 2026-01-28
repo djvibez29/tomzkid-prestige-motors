@@ -6,72 +6,30 @@
 
 <hr>
 
-<form method="get" class="filter-bar">
+{% if cars %}
+  <div class="car-grid">
+  {% for car in cars %}
+    <div class="car-card">
 
-  <label>Body Type:</label>
-  <select name="body_type">
-    <option value="">All</option>
-    <option>Sedan</option>
-    <option>Coupe</option>
-    <option>Convertible</option>
-    <option>SUV</option>
-    <option>4x4</option>
-    <option>6x6</option>
-  </select>
+      <a href="{{ url_for('car_detail', car_id=car.id) }}">
+        <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="300">
+      </a>
 
-  <label>Brand:</label>
-  <select name="brand">
-    <option value="">All</option>
-    <option>BMW</option>
-    <option>Mercedes</option>
-    <option>Ferrari</option>
-    <option>Lamborghini</option>
-    <option>Rolls-Royce</option>
-    <option>Bentley</option>
-  </select>
+      <h3>{{ car.name }}</h3>
+      <p>{{ car.brand }}</p>
 
-  <input type="text" name="brand_custom" placeholder="Or type brand">
+      <p class="price">${{ car.price_usd }}</p>
+      <p>{{ car.miles }} miles</p>
 
-  <label>Min Price ($)</label>
-  <input type="number" name="min_price">
+      <a class="view-btn" href="{{ url_for('car_detail', car_id=car.id) }}">
+        View Details
+      </a>
 
-  <label>Max Price ($)</label>
-  <input type="number" name="max_price">
-
-  <button type="submit">Apply Filters</button>
-
-</form>
-
-<hr>
-
-<div class="car-grid">
-
-{% for car in cars %}
-<a href="{{ url_for('car_detail', car_id=car.id) }}" class="car-card-link">
-
-<div class="car-card">
-
-  <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="320">
-
-  <h3>{{ car.name }}</h3>
-
-  <p><strong>{{ car.brand }}</strong> — {{ car.body_type }}</p>
-
-  <p class="price">${{ car.price_usd }}</p>
-
-  <p>Miles: {{ car.miles }}</p>
-
-  <p>{{ car.description|truncate(120) }}</p>
-
-</div>
-
-</a>
-{% endfor %}
-
-</div>
-
-{% if not cars %}
-<p>No vehicles found.</p>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <p>No vehicles listed yet.</p>
 {% endif %}
 
 {% endblock %}
