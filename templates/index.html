@@ -1,50 +1,70 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Tomzkid Prestige Motors</h1>
+<section class="hero">
+  <h1>Tomzkid Prestige Motors</h1>
+  <p>Ultra-Luxury & Exotic Automotive Marketplace</p>
+</section>
 
-<form method="get">
+<!-- FILTER BAR -->
+<section class="filters">
 
-  <select name="brand">
-    <option value="">All Brands</option>
-    {% for b in brands %}
-      <option value="{{ b }}">{{ b }}</option>
-    {% endfor %}
-  </select>
+  <form method="get">
 
-  <input name="min_price" placeholder="Min $" type="number">
-  <input name="max_price" placeholder="Max $" type="number">
+    <select name="brand">
+      <option value="">All Brands</option>
+      {% for b in brands %}
+        <option value="{{ b }}">{{ b }}</option>
+      {% endfor %}
+    </select>
 
-  <input name="max_miles" placeholder="Max Miles" type="number">
+    <input type="number" name="min_price" placeholder="Min Price $">
+    <input type="number" name="max_price" placeholder="Max Price $">
 
-  <button type="submit">Filter</button>
+    <input type="number" name="max_miles" placeholder="Max Miles">
 
-</form>
+    <button type="submit">Filter</button>
+
+  </form>
+
+</section>
+
+<!-- BRAND GRID -->
+<section class="brand-grid">
+
+  {% for b in brands %}
+    <a href="/brand/{{ b }}" class="brand-tile">
+      <div>{{ b }}</div>
+    </a>
+  {% endfor %}
+
+</section>
 
 <hr>
 
-<div class="car-grid">
+<!-- VEHICLE GRID -->
+<section class="car-grid">
 
 {% for car in cars %}
-  <div class="car-card">
 
-    <a href="{{ url_for('car_detail', car_id=car.id) }}">
-      <img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="300">
-    </a>
+  <a href="/car/{{ car.id }}" class="car-card">
+
+    <img src="{{ url_for('static', filename='uploads/' ~ car.main_image) }}">
 
     <h3>{{ car.name }}</h3>
     <p>{{ car.brand }}</p>
 
-    <p class="price">${{ car.price_usd }}</p>
-    <p>{{ car.miles }} miles</p>
+    <p class="price">
+      ${{ car.price_usd }}<br>
+      {{ car.miles }} miles
+    </p>
 
-    <a class="view-btn" href="{{ url_for('car_detail', car_id=car.id) }}">
-      View Details
-    </a>
+    <span class="view-btn">View Listing</span>
 
-  </div>
+  </a>
+
 {% endfor %}
 
-</div>
+</section>
 
 {% endblock %}
