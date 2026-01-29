@@ -10,7 +10,7 @@
 
   <input name="name" placeholder="Car name" required><br><br>
 
-  <label>Brand:</label><br>
+  <label>Brand</label><br>
   <select name="brand">
     {% for b in brands %}
       <option value="{{ b }}">{{ b }}</option>
@@ -19,20 +19,20 @@
 
   <input name="custom_brand" placeholder="Or new brand"><br><br>
 
-  <input name="price_usd" placeholder="Price $" required><br><br>
+  <input name="price_usd" placeholder="Price $" type="number" required><br><br>
 
-  <input name="miles" placeholder="Mileage" required><br><br>
+  <input name="miles" placeholder="Mileage" type="number" required><br><br>
 
   <textarea name="description" rows="12" placeholder="Full description" required></textarea><br><br>
 
-  <label>Main Image</label>
-  <input type="file" name="main_image" required><br><br>
+  <label>Main Image</label><br>
+  <input type="file" name="main_image" accept="image/*" required><br><br>
 
-  <label>Gallery Images</label>
-  <input type="file" name="gallery" multiple><br><br>
+  <label>Gallery Images</label><br>
+  <input type="file" name="gallery" multiple accept="image/*"><br><br>
 
-  <label>Walkaround Video</label>
-  <input type="file" name="video"><br><br>
+  <label>Walkaround Video</label><br>
+  <input type="file" name="video" accept="video/*"><br><br>
 
   <button type="submit">Add Vehicle</button>
 
