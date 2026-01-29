@@ -2,15 +2,27 @@
 {% block content %}
 
 <h2>{{ car.name }}</h2>
+<p>{{ car.brand }}</p>
 
-<img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="500">
+<div class="gallery">
 
-<p><strong>Brand:</strong> {{ car.brand }}</p>
-<p><strong>Price:</strong> ${{ car.price_usd }}</p>
-<p><strong>Miles:</strong> {{ car.miles }}</p>
+  <img src="{{ url_for('static', filename='uploads/' ~ car.main_image) }}" width="500">
+
+  {% for img in car.images %}
+    <img src="{{ url_for('static', filename='uploads/' ~ img.filename) }}" width="200">
+  {% endfor %}
+
+</div>
+
+{% if car.video %}
+  <video controls width="600">
+    <source src="{{ url_for('static', filename='uploads/' ~ car.video.filename) }}">
+  </video>
+{% endif %}
+
+<h3>${{ car.price_usd }}</h3>
+<p>{{ car.miles }} miles</p>
 
 <p>{{ car.description }}</p>
-
-<a href="/">← Back to inventory</a>
 
 {% endblock %}
