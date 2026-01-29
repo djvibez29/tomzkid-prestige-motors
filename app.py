@@ -14,7 +14,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
 app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static", "uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 500 * 1024 * 1024
 
 db = SQLAlchemy(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -76,11 +76,17 @@ ADMIN_PASS = "Ajetomiwa29"
 # ---------------- HELPERS ----------------
 
 def save_file(file):
-    ext = os.path.splitext(file.filename)[1]
-    name = f"{uuid.uuid4().hex}{ext}"
-    path = os.path.join(app.config["UPLOAD_FOLDER"], name)
+    if not file or file.filename == "":
+        return None
+
+    filename = secure_filename(file.filename)
+    ext = os.path.splitext(filename)[1].lower()
+
+    unique_name = f"{uuid.uuid4().hex}{ext}"
+    path = os.path.join(app.config["UPLOAD_FOLDER"], unique_name)
+
     file.save(path)
-    return name
+    return unique_name
 
 # ---------------- ROUTES ----------------
 
@@ -139,15 +145,15 @@ def admin():
         gallery_files = request.files.getlist("gallery")
         video_file = request.files.get("video")
 
-        if not main_file:
-            abort(400, "Main image required")
-
-        main_name = save_file(main_file)
+        if not main_file or main_file.filename == "":
+            abort(400, "Main image is required")
 
         brand = request.form.get("brand")
         custom_brand = request.form.get("custom_brand")
 
-        final_brand = custom_brand if custom_brand else brand
+        final_brand = custom_brand.strip() if custom_brand else brand
+
+        main_name = save_file(main_file)
 
         car = Car(
             name=request.form["name"],
@@ -162,7 +168,7 @@ def admin():
         db.session.flush()
 
         for img in gallery_files:
-            if img.filename:
+            if img and img.filename:
                 fname = save_file(img)
                 db.session.add(CarImage(filename=fname, car=car))
 
