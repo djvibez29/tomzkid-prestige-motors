@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, abort, url
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import os
+import uuid
 
 # ---------------- APP ----------------
 
@@ -13,7 +14,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
 app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static", "uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 300 * 1024 * 1024
 
 db = SQLAlchemy(app)
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
@@ -30,12 +31,56 @@ class Car(db.Model):
     miles = db.Column(db.Integer, nullable=False)
 
     description = db.Column(db.Text, nullable=False)
-    image = db.Column(db.String(300), nullable=False)
+    main_image = db.Column(db.String(300), nullable=False)
+
+    images = db.relationship(
+        "CarImage",
+        backref="car",
+        cascade="all, delete-orphan",
+    )
+
+    video = db.relationship(
+        "CarVideo",
+        backref="car",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
+
+
+class CarImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(300), nullable=False)
+
+    car_id = db.Column(
+        db.Integer,
+        db.ForeignKey("car.id"),
+        nullable=False,
+    )
+
+
+class CarVideo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(300))
+
+    car_id = db.Column(
+        db.Integer,
+        db.ForeignKey("car.id"),
+        nullable=False,
+    )
 
 # ---------------- ADMIN ----------------
 
 ADMIN_USER = "OGTomzkid"
 ADMIN_PASS = "Ajetomiwa29"
+
+# ---------------- HELPERS ----------------
+
+def save_file(file):
+    ext = os.path.splitext(file.filename)[1]
+    name = f"{uuid.uuid4().hex}{ext}"
+    path = os.path.join(app.config["UPLOAD_FOLDER"], name)
+    file.save(path)
+    return name
 
 # ---------------- ROUTES ----------------
 
@@ -65,23 +110,13 @@ def index():
 
     brands = [b[0] for b in db.session.query(Car.brand).distinct()]
 
-    return render_template(
-        "index.html",
-        cars=cars,
-        brands=brands,
-    )
+    return render_template("index.html", cars=cars, brands=brands)
 
 
-@app.route("/brand/<brand_name>")
-def brand_page(brand_name):
-
-    cars = Car.query.filter_by(brand=brand_name).all()
-
-    return render_template(
-        "brand.html",
-        cars=cars,
-        brand=brand_name,
-    )
+@app.route("/brand/<brand>")
+def brand_page(brand):
+    cars = Car.query.filter_by(brand=brand).all()
+    return render_template("brand.html", cars=cars, brand=brand)
 
 
 @app.route("/car/<int:car_id>")
@@ -100,15 +135,14 @@ def admin():
 
     if request.method == "POST":
 
-        file = request.files.get("image")
+        main_file = request.files.get("main_image")
+        gallery_files = request.files.getlist("gallery")
+        video_file = request.files.get("video")
 
-        if not file or file.filename == "":
-            abort(400, "Missing image")
+        if not main_file:
+            abort(400, "Main image required")
 
-        filename = secure_filename(file.filename)
-
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(save_path)
+        main_name = save_file(main_file)
 
         brand = request.form.get("brand")
         custom_brand = request.form.get("custom_brand")
@@ -121,21 +155,28 @@ def admin():
             price_usd=int(request.form["price_usd"]),
             miles=int(request.form["miles"]),
             description=request.form["description"],
-            image=filename,
+            main_image=main_name,
         )
 
         db.session.add(car)
+        db.session.flush()
+
+        for img in gallery_files:
+            if img.filename:
+                fname = save_file(img)
+                db.session.add(CarImage(filename=fname, car=car))
+
+        if video_file and video_file.filename:
+            vname = save_file(video_file)
+            db.session.add(CarVideo(filename=vname, car=car))
+
         db.session.commit()
 
         return redirect(url_for("admin"))
 
     cars = Car.query.order_by(Car.id.desc()).all()
 
-    return render_template(
-        "admin.html",
-        cars=cars,
-        brands=brands,
-    )
+    return render_template("admin.html", cars=cars, brands=brands)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -158,7 +199,7 @@ def logout():
     return redirect(url_for("login"))
 
 
-# ---------------- DB INIT ----------------
+# ---------------- INIT ----------------
 
 with app.app_context():
     db.create_all()
