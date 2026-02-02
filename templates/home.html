@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prestige Motors</title>
+
+    <style>
+        body {
+            background: #0f1115;
+            color: white;
+            font-family: Arial;
+            margin: 0;
+        }
+
+        header {
+            padding: 25px;
+            background: black;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 40px;
+        }
+
+        .car {
+            background: #1b1e24;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0,0,0,.6);
+            transition: transform .2s;
+            text-decoration: none;
+            color: white;
+        }
+
+        .car:hover {
+            transform: scale(1.03);
+        }
+
+        .car img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .info {
+            padding: 15px;
+        }
+
+        .price {
+            font-size: 20px;
+            color: #0aa2ff;
+        }
+
+        a { text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<header>🚘 Prestige Motors</header>
+
+<div class="grid">
+
+{% for car in cars %}
+<a href="/car/{{ car.id }}" class="car">
+
+    <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+
+    <div class="info">
+        <h3>{{ car.name }}</h3>
+        <p>{{ car.brand }}</p>
+        <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
+    </div>
+
+</a>
+{% else %}
+<p style="padding:40px;">No vehicles available yet.</p>
+{% endfor %}
+
+</div>
+
+</body>
+</html>
