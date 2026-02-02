@@ -1,41 +1,158 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{ car.name }}</title>
+    <title>{{ car.name }} - Prestige Motors</title>
 
     <style>
-        body { background:#0f1115; color:white; font-family:Arial; padding:40px; }
+        body {
+            background:#0f1115;
+            color:white;
+            font-family:Arial;
+            padding:40px;
+        }
+
+        .container {
+            max-width:1100px;
+            margin:auto;
+        }
+
+        .gallery {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+            gap:15px;
+            margin-bottom:40px;
+        }
 
         .gallery img {
             width:100%;
-            max-height:500px;
+            height:240px;
             object-fit:cover;
             border-radius:12px;
-            margin-bottom:15px;
         }
+
+        h1 { font-size:32px; }
+
+        .price {
+            color:#0aa2ff;
+            font-size:26px;
+            font-weight:bold;
+        }
+
+        .specs {
+            margin:20px 0;
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:10px;
+        }
+
+        .box {
+            background:#1b1e24;
+            padding:15px;
+            border-radius:12px;
+        }
+
+        .enquiry-box {
+            background:#14171c;
+            padding:25px;
+            border-radius:16px;
+            margin-top:40px;
+        }
+
+        input, textarea {
+            width:100%;
+            padding:12px;
+            margin:10px 0;
+            border-radius:8px;
+            border:none;
+        }
+
+        button {
+            padding:14px;
+            width:100%;
+            background:#0aa2ff;
+            border:none;
+            font-size:16px;
+            color:white;
+            border-radius:10px;
+            cursor:pointer;
+        }
+
+        button:hover {
+            opacity:.9;
+        }
+
     </style>
 </head>
 <body>
 
-<h1>{{ car.name }}</h1>
+<div class="container">
 
-<h3>{{ car.brand }}</h3>
+    <a href="/">← Back to Listings</a>
 
-<p>${{ "{:,}".format(car.price_usd) }}</p>
+    <h1>{{ car.name }}</h1>
 
-<div class="gallery">
+    <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
 
-{% for img in car.images %}
+    <!-- GALLERY -->
 
-<img src="{{ url_for('static', filename='uploads/' + img.filename) }}">
+    <div class="gallery">
 
-{% endfor %}
+        {% if car.images and car.images|length > 0 %}
+
+            {% for img in car.images %}
+                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}">
+            {% endfor %}
+
+        {% else %}
+            <img src="https://via.placeholder.com/600x400?text=No+Image">
+        {% endif %}
+
+    </div>
+
+    <!-- SPECS -->
+
+    <div class="specs">
+
+        <div class="box">
+            <b>Brand:</b> {{ car.brand }}
+        </div>
+
+        <div class="box">
+            <b>Mileage:</b> {{ "{:,}".format(car.miles) }} miles
+        </div>
+
+    </div>
+
+    <!-- DESCRIPTION -->
+
+    <div class="box">
+        <h3>Description</h3>
+        <p>{{ car.description }}</p>
+    </div>
+
+    <!-- ENQUIRY FORM -->
+
+    <div class="enquiry-box">
+
+        <h2>📩 Enquire About This Vehicle</h2>
+
+        <form method="POST">
+
+            <input name="name" placeholder="Your name" required>
+
+            <input name="email" placeholder="Your email" type="email" required>
+
+            <input name="phone" placeholder="Phone number">
+
+            <textarea name="message" rows="5" placeholder="Your message"></textarea>
+
+            <button>Send Enquiry</button>
+
+        </form>
+
+    </div>
 
 </div>
-
-<p>{{ car.description }}</p>
-
-<a href="/">⬅ Back</a>
 
 </body>
 </html>
