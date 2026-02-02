@@ -30,10 +30,18 @@
 
     <input name="miles" placeholder="Mileage" type="number" required>
 
-    <textarea name="description" rows="6" placeholder="Description" required></textarea>
+    <textarea name="description" rows="8" placeholder="Description" required></textarea>
 
     <label>Upload images (max 50)</label>
-    <input type="file" name="images" multiple required>
+
+    <!-- IMPORTANT -->
+    <input
+        type="file"
+        name="images"
+        multiple
+        accept="image/*"
+        required
+    >
 
     <button>Add Vehicle</button>
 
