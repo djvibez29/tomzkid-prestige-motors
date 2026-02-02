@@ -1,235 +1,179 @@
-import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-from flask_mail import Mail, Message
-from dotenv import load_dotenv
+import os
+from datetime import datetime
 
-# ---------------------------
-# ENV
-# ---------------------------
-load_dotenv()
+app = Flask(__name__)
+app.secret_key = "change-this-later"
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
-
-# ---------------------------
-# APP
-# ---------------------------
-app = Flask(__name__)
-
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret")
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    "DATABASE_URL", f"sqlite:///{os.path.join(BASE_DIR, 'database.db')}"
-)
-
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "database.db")
+app.config["UPLOAD_FOLDER"] = os.path.join(BASE_DIR, "static/uploads")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024 * 500  # 500MB safety limit
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024  # 20MB
-
-# ---------------------------
-# MAIL CONFIG (GMAIL)
-# ---------------------------
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.environ.get("EMAIL_USER")
-app.config["MAIL_PASSWORD"] = os.environ.get("EMAIL_PASS")
-app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("EMAIL_USER")
-
-mail = Mail(app)
-
-# ---------------------------
-# DB
-# ---------------------------
 db = SQLAlchemy(app)
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-# ---------------------------
-# MODELS
-# ---------------------------
+# ---------------- MODELS ----------------
 
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(200), nullable=False)
-    brand = db.Column(db.String(120), nullable=False)
+    name = db.Column(db.String(200))
+    brand = db.Column(db.String(100))
+    price_usd = db.Column(db.Integer)
+    miles = db.Column(db.Integer)
 
-    price_usd = db.Column(db.Integer, nullable=False)
-    miles = db.Column(db.Integer, nullable=False)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    description = db.Column(db.Text, nullable=False)
+    images = db.relationship(
+        "CarImage",
+        backref="car",
+        cascade="all, delete",
+        lazy=True
+    )
 
-    image = db.Column(db.String(300), nullable=False)
 
-
-class Inquiry(db.Model):
+class CarImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(120))
-    email = db.Column(db.String(120))
-    message = db.Column(db.Text)
-
+    filename = db.Column(db.String(300))
     car_id = db.Column(db.Integer, db.ForeignKey("car.id"))
-    car = db.relationship("Car")
 
-# ---------------------------
-# CREATE TABLES
-# ---------------------------
 
-with app.app_context():
-    db.create_all()
+# ---------------- ADMIN LOGIN ----------------
 
-# ---------------------------
-# ROUTES
-# ---------------------------
+ADMIN_USER = "OGTomzkid"
+ADMIN_PASS = "Ajetomiwa29"
+
+
+# ---------------- HOME ----------------
 
 @app.route("/")
 def home():
-    cars = Car.query.order_by(Car.id.desc()).all()
+
+    cars = Car.query.order_by(Car.created_at.desc()).all()
     return render_template("home.html", cars=cars)
 
 
+# ---------------- CAR PAGE ----------------
+
 @app.route("/car/<int:car_id>")
 def car_page(car_id):
+
     car = Car.query.get_or_404(car_id)
     return render_template("car.html", car=car)
 
 
-# ---------------------------
-# ADMIN UPLOAD
-# ---------------------------
+# ---------------- ADMIN ----------------
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
+    if not session.get("admin"):
+        return redirect("/login")
+
     if request.method == "POST":
 
-        if "image" not in request.files:
-            flash("No image uploaded")
-            return redirect("/admin")
+        files = request.files.getlist("images")
 
-        file = request.files["image"]
+        if not files:
+            return "No files uploaded", 400
 
-        if file.filename == "":
-            flash("No image selected")
-            return redirect("/admin")
-
-        filename = secure_filename(file.filename)
-
-        save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(save_path)
+        if len(files) > 50:
+            return "Maximum 50 images allowed", 400
 
         car = Car(
             name=request.form["name"],
             brand=request.form["brand"],
             price_usd=int(request.form["price_usd"]),
             miles=int(request.form["miles"]),
-            description=request.form["description"],
-            image=filename,
+            description=request.form["description"]
         )
 
         db.session.add(car)
         db.session.commit()
 
-        flash("Vehicle uploaded successfully!")
+        for file in files:
+            if file.filename == "":
+                continue
+
+            filename = secure_filename(file.filename)
+            save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+
+            base, ext = os.path.splitext(filename)
+            counter = 1
+
+            while os.path.exists(save_path):
+                filename = f"{base}_{counter}{ext}"
+                save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+                counter += 1
+
+            file.save(save_path)
+
+            img = CarImage(
+                filename=filename,
+                car_id=car.id
+            )
+
+            db.session.add(img)
+
+        db.session.commit()
+
         return redirect("/admin")
 
-    cars = Car.query.order_by(Car.id.desc()).all()
+    cars = Car.query.order_by(Car.created_at.desc()).all()
     return render_template("admin.html", cars=cars)
 
-
-# ---------------------------
-# DELETE CAR
-# ---------------------------
 
 @app.route("/delete-car/<int:car_id>")
 def delete_car(car_id):
 
+    if not session.get("admin"):
+        return redirect("/login")
+
     car = Car.query.get_or_404(car_id)
 
-    try:
-        image_path = os.path.join(app.config["UPLOAD_FOLDER"], car.image)
-        if os.path.exists(image_path):
-            os.remove(image_path)
-    except:
-        pass
+    for img in car.images:
+        try:
+            os.remove(os.path.join(app.config["UPLOAD_FOLDER"], img.filename))
+        except:
+            pass
 
     db.session.delete(car)
     db.session.commit()
 
-    flash("Vehicle deleted")
     return redirect("/admin")
 
 
-# ---------------------------
-# INQUIRY FORM
-# ---------------------------
+# ---------------- LOGIN ----------------
 
-@app.route("/inquire/<int:car_id>", methods=["POST"])
-def inquire(car_id):
+@app.route("/login", methods=["GET", "POST"])
+def login():
 
-    car = Car.query.get_or_404(car_id)
+    if request.method == "POST":
 
-    name = request.form["name"]
-    email = request.form["email"]
-    message = request.form["message"]
+        if (
+            request.form["username"] == ADMIN_USER
+            and request.form["password"] == ADMIN_PASS
+        ):
+            session["admin"] = True
+            return redirect("/admin")
 
-    inquiry = Inquiry(
-        name=name,
-        email=email,
-        message=message,
-        car=car,
-    )
-
-    db.session.add(inquiry)
-    db.session.commit()
-
-    # EMAIL SEND
-    try:
-
-        msg = Message(
-            subject=f"New Car Inquiry — {car.name}",
-            recipients=[os.environ.get("EMAIL_USER")],
-        )
-
-        msg.body = f"""
-New inquiry for {car.name}
-
-Name: {name}
-Email: {email}
-
-Message:
-{message}
-"""
-
-        mail.send(msg)
-
-    except Exception as e:
-        print("Email error:", e)
-
-    flash("Inquiry sent successfully!")
-    return redirect(url_for("car_page", car_id=car.id))
+    return render_template("login.html")
 
 
-# ---------------------------
-# LEADS DASHBOARD
-# ---------------------------
-
-@app.route("/leads")
-def leads():
-
-    inquiries = Inquiry.query.order_by(Inquiry.id.desc()).all()
-    return render_template("leads.html", inquiries=inquiries)
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
 
 
-# ---------------------------
-# RUN LOCAL
-# ---------------------------
+# ---------------- INIT DB ----------------
 
-if __name__ == "__main__":
-    app.run(debug=True)
+with app.app_context():
+    db.create_all()
