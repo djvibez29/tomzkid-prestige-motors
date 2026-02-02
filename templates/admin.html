@@ -1,133 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Admin Panel</title>
+    <title>Admin Dashboard</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #0f1115;
-            color: white;
-            padding: 30px;
-        }
+        body { background:#0f1115; color:white; font-family:Arial; padding:40px; }
+        input, textarea { width:100%; padding:10px; margin:10px 0; }
+        button { padding:12px; background:#0aa2ff; border:none; color:white; }
 
-        h1 {
-            margin-bottom: 15px;
-        }
-
-        .flash {
-            background: #1e7f43;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-        }
-
-        .card {
-            background: #1b1e24;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        img {
-            width: 180px;
-            border-radius: 8px;
-        }
-
-        form {
-            background: #1b1e24;
-            padding: 25px;
-            border-radius: 10px;
-            max-width: 600px;
-            margin-bottom: 40px;
-        }
-
-        input, textarea, button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            border: none;
-        }
-
-        textarea {
-            height: 120px;
-        }
-
-        button {
-            background: #0aa2ff;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .delete-btn {
-            background: crimson;
-            padding: 8px 14px;
-            text-decoration: none;
-            color: white;
-            border-radius: 6px;
+        .car-box {
+            background:#1b1e24;
+            padding:20px;
+            margin:15px 0;
+            border-radius:10px;
         }
     </style>
 </head>
 <body>
 
-<h1>🚗 Vehicle Admin</h1>
+<h1>🚘 Admin Dashboard</h1>
 
-<!-- FLASH -->
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    {% for msg in messages %}
-      <div class="flash">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
-<!-- UPLOAD FORM -->
 <form method="POST" enctype="multipart/form-data">
 
-    <h2>Add Vehicle</h2>
+    <input name="name" placeholder="Vehicle name" required>
 
-    <input type="text" name="name" placeholder="Car name" required>
+    <input name="brand" placeholder="Brand" required>
 
-    <input type="text" name="brand" placeholder="Brand" required>
+    <input name="price_usd" placeholder="Price USD" type="number" required>
 
-    <input type="number" name="price_usd" placeholder="Price (USD)" required>
+    <input name="miles" placeholder="Mileage" type="number" required>
 
-    <input type="number" name="miles" placeholder="Mileage" required>
+    <textarea name="description" rows="6" placeholder="Description" required></textarea>
 
-    <textarea name="description" placeholder="Description" required></textarea>
+    <label>Upload images (max 50)</label>
+    <input type="file" name="images" multiple required>
 
-    <input type="file" name="image" required>
+    <button>Add Vehicle</button>
 
-    <button type="submit">Upload Vehicle</button>
 </form>
 
 <hr>
 
-<h2>Current Inventory</h2>
+<h2>Listings</h2>
 
 {% for car in cars %}
-<div class="card">
 
-    <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+<div class="car-box">
 
-    <div>
-        <h3>{{ car.name }}</h3>
-        <p><b>Brand:</b> {{ car.brand }}</p>
-        <p><b>Price:</b> ${{ "{:,}".format(car.price_usd) }}</p>
-        <p><b>Miles:</b> {{ car.miles }}</p>
+    <b>{{ car.name }}</b> - {{ car.brand }} - ${{ "{:,}".format(car.price_usd) }}
 
-        <a class="delete-btn" href="/delete-car/{{ car.id }}">Delete</a>
-    </div>
+    <br>
+    Images: {{ car.images|length }}
+
+    <br><br>
+
+    <a href="/delete-car/{{ car.id }}" style="color:red;">Delete</a>
 
 </div>
-{% else %}
-<p>No cars uploaded yet.</p>
+
 {% endfor %}
 
 </body>
