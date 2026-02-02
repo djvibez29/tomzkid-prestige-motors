@@ -1,83 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Prestige Motors</title>
 
     <style>
         body {
-            background: #0f1115;
-            color: white;
-            font-family: Arial;
-            margin: 0;
-        }
-
-        header {
-            padding: 25px;
-            background: black;
-            text-align: center;
-            font-size: 28px;
+            background:#0f1115;
+            color:white;
+            font-family:Arial;
+            padding:40px;
         }
 
         .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            padding: 40px;
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+            gap:20px;
         }
 
-        .car {
-            background: #1b1e24;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 0 15px rgba(0,0,0,.6);
-            transition: transform .2s;
-            text-decoration: none;
-            color: white;
+        .card {
+            background:#1b1e24;
+            border-radius:14px;
+            overflow:hidden;
+            text-decoration:none;
+            color:white;
+            transition:.25s;
         }
 
-        .car:hover {
-            transform: scale(1.03);
+        .card:hover {
+            transform:scale(1.02);
         }
 
-        .car img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
+        .card img {
+            width:100%;
+            height:200px;
+            object-fit:cover;
         }
 
-        .info {
-            padding: 15px;
+        .card-body {
+            padding:15px;
         }
 
         .price {
-            font-size: 20px;
-            color: #0aa2ff;
+            color:#0aa2ff;
+            font-weight:bold;
         }
-
-        a { text-decoration: none; }
     </style>
 </head>
 <body>
 
-<header>🚘 Prestige Motors</header>
+<h1>🔥 Prestige Motors</h1>
 
 <div class="grid">
 
 {% for car in cars %}
-<a href="/car/{{ car.id }}" class="car">
 
-    <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+<a href="/car/{{ car.id }}" class="card">
 
-    <div class="info">
+    {% if car.images and car.images|length > 0 %}
+        <img src="{{ url_for('static', filename='uploads/' + car.images[0].filename) }}">
+    {% else %}
+        <img src="https://via.placeholder.com/400x250?text=No+Image">
+    {% endif %}
+
+    <div class="card-body">
+
         <h3>{{ car.name }}</h3>
+
         <p>{{ car.brand }}</p>
+
         <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
+
     </div>
 
 </a>
-{% else %}
-<p style="padding:40px;">No vehicles available yet.</p>
+
 {% endfor %}
 
 </div>
