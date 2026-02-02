@@ -1,37 +1,41 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ car.name }}</title>
 
-{% block content %}
+    <style>
+        body { background:#0f1115; color:white; font-family:Arial; padding:40px; }
+
+        .gallery img {
+            width:100%;
+            max-height:500px;
+            object-fit:cover;
+            border-radius:12px;
+            margin-bottom:15px;
+        }
+    </style>
+</head>
+<body>
 
 <h1>{{ car.name }}</h1>
 
-<img src="{{ url_for('static', filename='uploads/' ~ car.image) }}" width="400">
+<h3>{{ car.brand }}</h3>
 
-<p><strong>Brand:</strong> {{ car.brand }}</p>
-<p><strong>Price:</strong> ${{ car.price_usd }}</p>
-<p><strong>Miles:</strong> {{ car.miles }}</p>
+<p>${{ "{:,}".format(car.price_usd) }}</p>
+
+<div class="gallery">
+
+{% for img in car.images %}
+
+<img src="{{ url_for('static', filename='uploads/' + img.filename) }}">
+
+{% endfor %}
+
+</div>
 
 <p>{{ car.description }}</p>
 
-<hr>
+<a href="/">⬅ Back</a>
 
-<h2>Send Inquiry</h2>
-
-<form method="POST">
-
-  <input name="name" placeholder="Your Name" required>
-  <br>
-
-  <input name="email" type="email" placeholder="Your Email" required>
-  <br>
-
-  <input name="phone" placeholder="Phone" required>
-  <br>
-
-  <textarea name="message" rows="6" placeholder="Message" required></textarea>
-  <br>
-
-  <button type="submit">Send Inquiry</button>
-
-</form>
-
-{% endblock %}
+</body>
+</html>
