@@ -1,53 +1,134 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
 
-<h2>Admin Dashboard</h2>
-<a href="/logout">Logout</a>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f1115;
+            color: white;
+            padding: 30px;
+        }
 
-<hr>
+        h1 {
+            margin-bottom: 15px;
+        }
 
-<form method="post" enctype="multipart/form-data">
+        .flash {
+            background: #1e7f43;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
 
-  <input name="name" placeholder="Car name" required><br><br>
+        .card {
+            background: #1b1e24;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
 
-  <label>Brand</label><br>
-  <select name="brand">
-    {% for b in brands %}
-      <option value="{{ b }}">{{ b }}</option>
+        img {
+            width: 180px;
+            border-radius: 8px;
+        }
+
+        form {
+            background: #1b1e24;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        textarea {
+            height: 120px;
+        }
+
+        button {
+            background: #0aa2ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .delete-btn {
+            background: crimson;
+            padding: 8px 14px;
+            text-decoration: none;
+            color: white;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🚗 Vehicle Admin</h1>
+
+<!-- FLASH -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="flash">{{ msg }}</div>
     {% endfor %}
-  </select><br><br>
+  {% endif %}
+{% endwith %}
 
-  <input name="custom_brand" placeholder="Or new brand"><br><br>
+<!-- UPLOAD FORM -->
+<form method="POST" enctype="multipart/form-data">
 
-  <input name="price_usd" placeholder="Price $" type="number" required><br><br>
+    <h2>Add Vehicle</h2>
 
-  <input name="miles" placeholder="Mileage" type="number" required><br><br>
+    <input type="text" name="name" placeholder="Car name" required>
 
-  <textarea name="description" rows="12" placeholder="Full description" required></textarea><br><br>
+    <input type="text" name="brand" placeholder="Brand" required>
 
-  <label>Main Image</label><br>
-  <input type="file" name="main_image" accept="image/*" required><br><br>
+    <input type="number" name="price_usd" placeholder="Price (USD)" required>
 
-  <label>Gallery Images</label><br>
-  <input type="file" name="gallery" multiple accept="image/*"><br><br>
+    <input type="number" name="miles" placeholder="Mileage" required>
 
-  <label>Walkaround Video</label><br>
-  <input type="file" name="video" accept="video/*"><br><br>
+    <textarea name="description" placeholder="Description" required></textarea>
 
-  <button type="submit">Add Vehicle</button>
+    <input type="file" name="image" required>
 
+    <button type="submit">Upload Vehicle</button>
 </form>
 
 <hr>
 
-<h3>Current Listings</h3>
+<h2>Current Inventory</h2>
 
 {% for car in cars %}
-  <div>
-    <strong>{{ car.name }}</strong> — {{ car.brand }}<br>
-    ${{ car.price_usd }} | {{ car.miles }} miles<br>
-  </div>
-  <hr>
+<div class="card">
+
+    <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+
+    <div>
+        <h3>{{ car.name }}</h3>
+        <p><b>Brand:</b> {{ car.brand }}</p>
+        <p><b>Price:</b> ${{ "{:,}".format(car.price_usd) }}</p>
+        <p><b>Miles:</b> {{ car.miles }}</p>
+
+        <a class="delete-btn" href="/delete-car/{{ car.id }}">Delete</a>
+    </div>
+
+</div>
+{% else %}
+<p>No cars uploaded yet.</p>
 {% endfor %}
 
-{% endblock %}
+</body>
+</html>
