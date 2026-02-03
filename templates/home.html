@@ -48,12 +48,19 @@
 
                 <h3>{{ car.brand }} {{ car.model }}</h3>
 
+                <!-- SAFE PRICE -->
                 <p class="price">
-                    ₦{{ "{:,}".format(car.price) }}
+                    {% if car.price %}
+                        ₦{{ "{:,}".format(car.price|int) }}
+                    {% else %}
+                        Price on request
+                    {% endif %}
                 </p>
 
                 <p class="meta">
-                    {{ car.year }} • {{ car.body_type }} • {{ car.transmission }}
+                    {{ car.year or "—" }} • 
+                    {{ car.body_type or "—" }} • 
+                    {{ car.transmission or "—" }}
                 </p>
 
                 <!-- BUTTONS -->
