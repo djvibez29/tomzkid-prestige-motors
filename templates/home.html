@@ -2,59 +2,89 @@
 
 {% block content %}
 
-<section class="hero">
-    <h1>Tomzkid Prestige Motors</h1>
-    <p>Ultra-Luxury Automotive Marketplace</p>
+<div class="container">
 
-    <!-- SEARCH BAR -->
-    <form method="get" class="search-form">
-        <input
-            type="text"
-            name="search"
-            placeholder="Search by brand, model, keyword..."
-            value="{{ search }}"
+    <h1 class="page-title">Available Vehicles</h1>
+
+    <!-- SEARCH -->
+    <form method="GET" action="/" class="search-form">
+        <input 
+            type="text" 
+            name="search" 
+            placeholder="Search brand or model..." 
+            value="{{ request.args.get('search', '') }}"
         >
         <button type="submit">Search</button>
     </form>
-</section>
 
-<hr>
+    <!-- VEHICLE GRID -->
+    <div class="car-grid">
 
-{% if cars %}
+        {% for car in cars %}
 
-<div class="car-grid">
+        <div class="car-card">
 
-    {% for car in cars %}
-    <a href="{{ url_for('car_detail', car_id=car.id) }}" class="car-card">
+            <!-- IMAGE -->
+            <a href="{{ url_for('car_page', car_id=car.id) }}">
 
-        <img
-            src="{{ url_for('static', filename='uploads/' ~ car.image) }}"
-            loading="lazy"
-        >
+                {% if car.images and car.images|length > 0 %}
+                    <img 
+                        src="{{ url_for('static', filename='uploads/' ~ car.images[0].filename) }}" 
+                        alt="{{ car.brand }} {{ car.model }}"
+                        class="car-image"
+                    >
+                {% else %}
+                    <img 
+                        src="{{ url_for('static', filename='no-image.png') }}" 
+                        alt="No image"
+                        class="car-image"
+                    >
+                {% endif %}
 
-        <h3>{{ car.brand }} {{ car.name }}</h3>
+            </a>
 
-        <p class="price">
-            ${{ "{:,}".format(car.price_usd) }}
-        </p>
+            <!-- INFO -->
+            <div class="car-info">
 
-        <p class="miles">
-            {{ "{:,}".format(car.miles) }} miles
-        </p>
+                <h3>{{ car.brand }} {{ car.model }}</h3>
 
-        <p class="desc-preview">
-            {{ car.description[:120] }}...
-        </p>
+                <p class="price">
+                    ₦{{ "{:,}".format(car.price) }}
+                </p>
 
-        <span class="view-btn">View Details</span>
+                <p class="meta">
+                    {{ car.year }} • {{ car.body_type }} • {{ car.transmission }}
+                </p>
 
-    </a>
-    {% endfor %}
+                <!-- BUTTONS -->
+                <div class="card-actions">
+
+                    <a 
+                        href="{{ url_for('car_page', car_id=car.id) }}" 
+                        class="btn view-btn"
+                    >
+                        View Details
+                    </a>
+
+                    <a 
+                        href="{{ url_for('car_page', car_id=car.id) }}#contact" 
+                        class="btn enquire-btn"
+                    >
+                        Enquire
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+            <p class="empty-msg">No vehicles found.</p>
+        {% endfor %}
+
+    </div>
 
 </div>
-
-{% else %}
-    <p>No vehicles found.</p>
-{% endif %}
 
 {% endblock %}
