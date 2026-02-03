@@ -1,81 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Prestige Motors</title>
-
-    <style>
-        body {
-            background:#0f1115;
-            color:white;
-            font-family:Arial;
-            padding:40px;
-        }
-
-        .grid {
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-            gap:20px;
-        }
-
-        .card {
-            background:#1b1e24;
-            border-radius:14px;
-            overflow:hidden;
-            text-decoration:none;
-            color:white;
-            transition:.25s;
-        }
-
-        .card:hover {
-            transform:scale(1.02);
-        }
-
-        .card img {
-            width:100%;
-            height:200px;
-            object-fit:cover;
-        }
-
-        .card-body {
-            padding:15px;
-        }
-
-        .price {
-            color:#0aa2ff;
-            font-weight:bold;
-        }
-    </style>
+    <title>Tomzkid Prestige Motors</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<h1>🔥 Prestige Motors</h1>
+<h1>Available Vehicles</h1>
 
-<div class="grid">
+<div class="car-grid">
+    {% for car in cars %}
+    <a href="{{ url_for('car_detail', car_id=car.id) }}" class="car-card">
 
-{% for car in cars %}
+        {% if car.gallery %}
+        <img src="/static/uploads/{{ car.gallery[0].filename }}">
+        {% endif %}
 
-<a href="/car/{{ car.id }}" class="card">
+        <h3>{{ car.brand }} {{ car.name }}</h3>
+        <p>${{ "{:,}".format(car.price_usd) }}</p>
+        <p>{{ "{:,}".format(car.miles) }} miles</p>
 
-    {% if car.images and car.images|length > 0 %}
-        <img src="{{ url_for('static', filename='uploads/' + car.images[0].filename) }}">
-    {% else %}
-        <img src="https://via.placeholder.com/400x250?text=No+Image">
-    {% endif %}
-
-    <div class="card-body">
-
-        <h3>{{ car.name }}</h3>
-
-        <p>{{ car.brand }}</p>
-
-        <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
-
-    </div>
-
-</a>
-
-{% endfor %}
-
+    </a>
+    {% endfor %}
 </div>
 
 </body>
