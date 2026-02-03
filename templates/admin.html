@@ -1,40 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
 
     <style>
-        body { background:#0f1115; color:white; font-family:Arial; padding:40px; }
-        input, textarea { width:100%; padding:10px; margin:10px 0; }
-        button { padding:12px; background:#0aa2ff; border:none; color:white; }
 
-        .car-box {
-            background:#1b1e24;
-            padding:20px;
-            margin:15px 0;
-            border-radius:10px;
+        body {
+            background: #0b0b0b;
+            color: white;
+            font-family: Arial;
+            padding: 40px;
         }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            background: #161616;
+            padding: 25px;
+            border-radius: 12px;
+        }
+
+        input,
+        textarea,
+        button {
+            width: 100%;
+            margin-bottom: 14px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        button {
+            background: gold;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
     </style>
+
 </head>
 <body>
 
-<h1>🚘 Admin Dashboard</h1>
+<h1>Upload Vehicle</h1>
 
 <form method="POST" enctype="multipart/form-data">
 
-    <input name="name" placeholder="Vehicle name" required>
+    <input type="text" name="brand" placeholder="Brand" required>
 
-    <input name="brand" placeholder="Brand" required>
+    <input type="text" name="name" placeholder="Model" required>
 
-    <input name="price_usd" placeholder="Price USD" type="number" required>
+    <input type="number" name="price_usd" placeholder="Price USD" required>
 
-    <input name="miles" placeholder="Mileage" type="number" required>
+    <input type="number" name="miles" placeholder="Mileage" required>
 
-    <textarea name="description" rows="8" placeholder="Description" required></textarea>
+    <textarea
+        name="description"
+        placeholder="Description"
+        required
+    ></textarea>
 
-    <label>Upload images (max 50)</label>
-
-    <!-- IMPORTANT -->
     <input
         type="file"
         name="images"
@@ -43,30 +76,11 @@
         required
     >
 
-    <button>Add Vehicle</button>
+    <small>Max 50 images per vehicle</small>
+
+    <button type="submit">Upload Vehicle</button>
 
 </form>
-
-<hr>
-
-<h2>Listings</h2>
-
-{% for car in cars %}
-
-<div class="car-box">
-
-    <b>{{ car.name }}</b> - {{ car.brand }} - ${{ "{:,}".format(car.price_usd) }}
-
-    <br>
-    Images: {{ car.images|length }}
-
-    <br><br>
-
-    <a href="/delete-car/{{ car.id }}" style="color:red;">Delete</a>
-
-</div>
-
-{% endfor %}
 
 </body>
 </html>
