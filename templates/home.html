@@ -1,28 +1,60 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Tomzkid Prestige Motors</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>Available Vehicles</h1>
+{% block content %}
+
+<section class="hero">
+    <h1>Tomzkid Prestige Motors</h1>
+    <p>Ultra-Luxury Automotive Marketplace</p>
+
+    <!-- SEARCH BAR -->
+    <form method="get" class="search-form">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search by brand, model, keyword..."
+            value="{{ search }}"
+        >
+        <button type="submit">Search</button>
+    </form>
+</section>
+
+<hr>
+
+{% if cars %}
 
 <div class="car-grid">
+
     {% for car in cars %}
     <a href="{{ url_for('car_detail', car_id=car.id) }}" class="car-card">
 
-        {% if car.gallery %}
-        <img src="/static/uploads/{{ car.gallery[0].filename }}">
-        {% endif %}
+        <img
+            src="{{ url_for('static', filename='uploads/' ~ car.image) }}"
+            loading="lazy"
+        >
 
         <h3>{{ car.brand }} {{ car.name }}</h3>
-        <p>${{ "{:,}".format(car.price_usd) }}</p>
-        <p>{{ "{:,}".format(car.miles) }} miles</p>
+
+        <p class="price">
+            ${{ "{:,}".format(car.price_usd) }}
+        </p>
+
+        <p class="miles">
+            {{ "{:,}".format(car.miles) }} miles
+        </p>
+
+        <p class="desc-preview">
+            {{ car.description[:120] }}...
+        </p>
+
+        <span class="view-btn">View Details</span>
 
     </a>
     {% endfor %}
+
 </div>
 
-</body>
-</html>
+{% else %}
+    <p>No vehicles found.</p>
+{% endif %}
+
+{% endblock %}
