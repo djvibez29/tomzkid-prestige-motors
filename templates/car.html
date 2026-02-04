@@ -1,158 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ car.name }} - Prestige Motors</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            background:#0f1115;
-            color:white;
-            font-family:Arial;
-            padding:40px;
-        }
-
-        .container {
-            max-width:1100px;
-            margin:auto;
-        }
-
-        .gallery {
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-            gap:15px;
-            margin-bottom:40px;
-        }
-
-        .gallery img {
-            width:100%;
-            height:240px;
-            object-fit:cover;
-            border-radius:12px;
-        }
-
-        h1 { font-size:32px; }
-
-        .price {
-            color:#0aa2ff;
-            font-size:26px;
-            font-weight:bold;
-        }
-
-        .specs {
-            margin:20px 0;
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:10px;
-        }
-
-        .box {
-            background:#1b1e24;
-            padding:15px;
-            border-radius:12px;
-        }
-
-        .enquiry-box {
-            background:#14171c;
-            padding:25px;
-            border-radius:16px;
-            margin-top:40px;
-        }
-
-        input, textarea {
-            width:100%;
-            padding:12px;
-            margin:10px 0;
-            border-radius:8px;
-            border:none;
-        }
-
-        button {
-            padding:14px;
-            width:100%;
-            background:#0aa2ff;
-            border:none;
-            font-size:16px;
-            color:white;
-            border-radius:10px;
-            cursor:pointer;
-        }
-
-        button:hover {
-            opacity:.9;
-        }
-
-    </style>
-</head>
-<body>
+{% block content %}
 
 <div class="container">
 
-    <a href="/">← Back to Listings</a>
+  <div class="car-detail">
 
-    <h1>{{ car.name }}</h1>
+    <div class="car-gallery">
 
-    <p class="price">${{ "{:,}".format(car.price_usd) }}</p>
+      {% if car.images and car.images|length > 0 %}
 
-    <!-- GALLERY -->
+        <div class="main-image">
+          <img
+            id="mainImage"
+            src="{{ url_for('static', filename='uploads/cars/' ~ car.images[0].filename) }}"
+          >
+        </div>
 
-    <div class="gallery">
+        <div class="thumbs">
 
-        {% if car.images and car.images|length > 0 %}
+          {% for img in car.images %}
+            <img
+              src="{{ url_for('static', filename='uploads/cars/' ~ img.filename) }}"
+              onclick="document.getElementById('mainImage').src=this.src"
+            >
+          {% endfor %}
 
-            {% for img in car.images %}
-                <img src="{{ url_for('static', filename='uploads/' + img.filename) }}">
-            {% endfor %}
+        </div>
 
+      {% else %}
+
+        <img
+          src="{{ url_for('static', filename='img/no-image.png') }}"
+        >
+
+      {% endif %}
+
+    </div>
+
+    <div class="car-meta">
+
+      <h2>{{ car.title }}</h2>
+
+      <p>{{ car.brand }} {{ car.model }}</p>
+
+      <p class="price">
+        {% if car.price %}
+          ₦{{ "{:,}".format(car.price|int) }}
         {% else %}
-            <img src="https://via.placeholder.com/600x400?text=No+Image">
+          Price on request
         {% endif %}
+      </p>
+
+      <ul class="specs">
+        <li><strong>Year:</strong> {{ car.year }}</li>
+        <li><strong>Mileage:</strong> {{ car.mileage }} km</li>
+        <li><strong>Transmission:</strong> {{ car.transmission }}</li>
+        <li><strong>Fuel:</strong> {{ car.fuel }}</li>
+      </ul>
 
     </div>
 
-    <!-- SPECS -->
-
-    <div class="specs">
-
-        <div class="box">
-            <b>Brand:</b> {{ car.brand }}
-        </div>
-
-        <div class="box">
-            <b>Mileage:</b> {{ "{:,}".format(car.miles) }} miles
-        </div>
-
-    </div>
-
-    <!-- DESCRIPTION -->
-
-    <div class="box">
-        <h3>Description</h3>
-        <p>{{ car.description }}</p>
-    </div>
-
-    <!-- ENQUIRY FORM -->
-
-    <div class="enquiry-box">
-
-        <h2>📩 Enquire About This Vehicle</h2>
-
-        <form method="POST">
-
-            <input name="name" placeholder="Your name" required>
-
-            <input name="email" placeholder="Your email" type="email" required>
-
-            <input name="phone" placeholder="Phone number">
-
-            <textarea name="message" rows="5" placeholder="Your message"></textarea>
-
-            <button>Send Enquiry</button>
-
-        </form>
-
-    </div>
+  </div>
 
 </div>
 
-</body>
-</html>
+{% endblock %}
