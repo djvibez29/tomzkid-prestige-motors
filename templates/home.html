@@ -1,54 +1,57 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="container">
+<h1 class="page-title">Luxury Inventory</h1>
 
-  <h2 class="page-title">Available Vehicles</h2>
+<div class="car-grid">
 
-  <div class="cars-grid">
+  {% for car in cars.items %}
 
-    {% for car in cars %}
+  <a href="{{ url_for('car_page', car_id=car.id) }}" class="car-card">
 
-      <a href="{{ url_for('car_page', car_id=car.id) }}" class="car-card">
+    {% if car.images and car.images[0] %}
+      <img
+        src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}"
+        alt="{{ car.title }}"
+      >
+    {% else %}
+      <img
+        src="{{ url_for('static', filename='img/no-image.png') }}"
+        alt="No image"
+      >
+    {% endif %}
 
-        <div class="car-image">
+    <div class="card-body">
 
-          {% if car.images and car.images|length > 0 %}
-            <img
-              src="{{ url_for('static', filename='uploads/cars/' ~ car.images[0].filename) }}"
-              alt="{{ car.title }}"
-            >
-          {% else %}
-            <img
-              src="{{ url_for('static', filename='img/no-image.png') }}"
-              alt="No image"
-            >
-          {% endif %}
+      <h3>{{ car.title }}</h3>
 
-        </div>
+      <p class="brand">{{ car.brand }}</p>
 
-        <div class="car-info">
+      <p class="price">₦{{ "{:,}".format(car.price or 0) }}</p>
 
-          <h3>{{ car.title }}</h3>
+    </div>
 
-          <p class="brand">{{ car.brand }} • {{ car.model }}</p>
+  </a>
 
-          <p class="price">
-            {% if car.price %}
-              ₦{{ "{:,}".format(car.price|int) }}
-            {% else %}
-              Price on request
-            {% endif %}
-          </p>
+  {% else %}
+    <p>No vehicles available yet.</p>
+  {% endfor %}
 
-        </div>
+</div>
 
-      </a>
+<!-- ================= PAGINATION ================= -->
 
-    {% endfor %}
+<div class="pagination">
 
-  </div>
+  {% if cars.has_prev %}
+    <a href="?page={{ cars.prev_num }}">← Prev</a>
+  {% endif %}
+
+  <span>Page {{ cars.page }} of {{ cars.pages }}</span>
+
+  {% if cars.has_next %}
+    <a href="?page={{ cars.next_num }}">Next →</a>
+  {% endif %}
 
 </div>
 
