@@ -1,113 +1,40 @@
-{% extends "base.html" %}
-{% block content %}
-
-<div class="admin-wrapper">
-
-  <div class="admin-topbar">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
     <h1>Admin Dashboard</h1>
-    <a href="{{ url_for('admin_logout') }}" class="logout-btn">Logout</a>
-  </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-  <!-- ================= ADD VEHICLE ================= -->
-
-  <section class="admin-section">
-    <h2>Add New Vehicle</h2>
-
-    <form method="POST" enctype="multipart/form-data" class="admin-form">
-
-      <div class="form-grid">
-
-        <input type="text" name="title" placeholder="Vehicle Title" required>
-
-        <input type="text" name="brand" placeholder="Brand" required>
-
-        <input type="number" name="price" placeholder="Price (₦)" required>
-
-      </div>
-
-      <textarea name="description" placeholder="Full Description" rows="6" required></textarea>
-
-      <label class="upload-label">
-        Upload Images (up to 50)
-        <input
-          type="file"
-          name="images"
-          multiple
-          accept="image/*"
-        >
-      </label>
-
-      <button type="submit" class="primary-btn">Publish Vehicle</button>
-
+    <h2>Publish Vehicle</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Vehicle Title" required><br>
+        <input type="text" name="brand" placeholder="Brand" required><br>
+        <input type="text" name="price" placeholder="Price in $" required><br>
+        <textarea name="description" placeholder="Description"></textarea><br>
+        <input type="file" name="image" accept="image/*"><br>
+        <button type="submit">Publish</button>
     </form>
-  </section>
 
-  <!-- ================= INVENTORY ================= -->
-
-  <section class="admin-section">
-
-    <h2>Inventory</h2>
-
-    <div class="inventory-grid">
-
-      {% for car in cars %}
-      <div class="inventory-card">
-
-        <strong>{{ car.title }}</strong>
-        <span>{{ car.brand }}</span>
-        <span>₦{{ "{:,}".format(car.price or 0) }}</span>
-
-        <span>{{ car.images|length }} images</span>
-
-      </div>
-      {% else %}
-        <p>No vehicles uploaded yet.</p>
-      {% endfor %}
-
-    </div>
-
-  </section>
-
-  <!-- ================= LEADS ================= -->
-
-  <section class="admin-section">
-
-    <h2>Customer Enquiries</h2>
-
-    <div class="lead-table">
-
-      <table>
-
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Vehicle ID</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {% for lead in leads %}
-          <tr>
-            <td>{{ lead.name }}</td>
-            <td>{{ lead.email }}</td>
-            <td>{{ lead.phone }}</td>
-            <td>{{ lead.car_id }}</td>
-            <td>{{ lead.message }}</td>
-          </tr>
-          {% else %}
-            <tr><td colspan="5">No enquiries yet.</td></tr>
-          {% endfor %}
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </section>
-
-</div>
-
-{% endblock %}
+    <h2>Existing Vehicles</h2>
+    <ul>
+        {% for car in cars %}
+        <li>
+            <strong>{{ car.title }}</strong> - {{ car.brand }} - ${{ "{:,.2f}".format(car.price) }}
+            {% if car.image_filename %}
+            <br><img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" width="200">
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
