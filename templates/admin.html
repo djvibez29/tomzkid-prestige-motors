@@ -2,39 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Car Marketplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Admin Dashboard</h1>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+    <header>
+        <h1>Admin Panel</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('admin') }}">Admin</a>
+        </nav>
+    </header>
 
-    <h2>Publish Vehicle</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <input type="text" name="title" placeholder="Vehicle Title" required><br>
-        <input type="text" name="brand" placeholder="Brand" required><br>
-        <input type="text" name="price" placeholder="Price in $" required><br>
-        <textarea name="description" placeholder="Description"></textarea><br>
-        <input type="file" name="image" accept="image/*"><br>
-        <button type="submit">Publish</button>
-    </form>
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, msg in messages %}
+            <p class="{{ category }}">{{ msg }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
 
-    <h2>Existing Vehicles</h2>
-    <ul>
-        {% for car in cars %}
-        <li>
-            <strong>{{ car.title }}</strong> - {{ car.brand }} - ${{ "{:,.2f}".format(car.price) }}
-            {% if car.image_filename %}
-            <br><img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" width="200">
+        <section class="form-section">
+            <h2>Add a New Car</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <label>Title:
+                    <input type="text" name="title" required>
+                </label>
+                <label>Brand:
+                    <input type="text" name="brand" required>
+                </label>
+                <label>Price:
+                    <input type="number" name="price" step="0.01" required>
+                </label>
+                <label>Description:
+                    <textarea name="description"></textarea>
+                </label>
+                <label>Image:
+                    <input type="file" name="image" accept="image/*">
+                </label>
+                <button type="submit">Publish Car</button>
+            </form>
+        </section>
+
+        <section class="cars-list">
+            <h2>Existing Cars</h2>
+            {% if cars %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Brand</th>
+                        <th>Price</th>
+                        <th>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for car in cars %}
+                    <tr>
+                        <td>{{ car.id }}</td>
+                        <td>{{ car.title }}</td>
+                        <td>{{ car.brand }}</td>
+                        <td>${{ "%.2f"|format(car.price) }}</td>
+                        <td>
+                            {% if car.image_filename %}
+                            <img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" alt="{{ car.title }}" class="admin-img">
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No cars added yet.</p>
             {% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; {{ current_year }} Car Marketplace Admin Panel.</p>
+    </footer>
 </body>
 </html>
