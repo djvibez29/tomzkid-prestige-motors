@@ -2,23 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Prestige Motors</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Marketplace</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Welcome to Prestige Motors</h1>
-    <div class="cars-container">
-        {% for car in cars %}
-        <div class="car-card">
-            <h3>{{ car.title }}</h3>
-            <p>Brand: {{ car.brand }}</p>
-            <p>Price: ${{ "{:,.2f}".format(car.price) }}</p>
-            {% if car.image_filename %}
-            <img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" width="300">
-            {% endif %}
-            <p>{{ car.description }}</p>
+    <header>
+        <h1>🚗 Car Marketplace</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('admin') }}">Admin</a>
+        </nav>
+    </header>
+
+    <main>
+        {% if cars %}
+        <div class="cars-grid">
+            {% for car in cars %}
+            <div class="car-card">
+                {% if car.image_filename %}
+                <img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" alt="{{ car.title }}">
+                {% else %}
+                <div class="placeholder">No Image</div>
+                {% endif %}
+                <h2>{{ car.title }}</h2>
+                <p><strong>Brand:</strong> {{ car.brand }}</p>
+                <p><strong>Price:</strong> ${{ "%.2f"|format(car.price) }}</p>
+                <p>{{ car.description }}</p>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
+        {% else %}
+        <p class="no-cars">No cars available at the moment.</p>
+        {% endif %}
+    </main>
+
+    <footer>
+        <p>&copy; {{ current_year }} Car Marketplace. All rights reserved.</p>
+    </footer>
 </body>
 </html>
