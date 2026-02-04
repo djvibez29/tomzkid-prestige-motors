@@ -1,136 +1,181 @@
-body {
+/* --- General Reset --- */
+* {
     margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: #0b0b0b;
-    color: #e5e5e5;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* NAV */
+body {
+    background: #f4f6f8;
+    color: #333;
+    line-height: 1.6;
+}
 
-.navbar {
+/* --- Header --- */
+header {
+    background: #1f2937;
+    color: #fff;
+    padding: 1rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 22px 40px;
-    background: #000;
-    border-bottom: 1px solid #222;
 }
 
-.logo {
-    font-size: 22px;
-    letter-spacing: 1px;
+header h1 {
+    font-size: 1.8rem;
 }
 
-.navbar a {
-    color: #c9a14a;
-    margin-left: 20px;
+header nav a {
+    color: #fff;
     text-decoration: none;
+    margin-left: 1rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
 }
 
-/* HERO */
-
-.hero {
-    text-align: center;
-    padding: 90px 20px;
-    background: radial-gradient(circle at top, #111, #000);
+header nav a:hover {
+    color: #60a5fa;
 }
 
-/* FILTERS */
-
-.filters {
-    background: #050505;
-    padding: 20px;
-    border-bottom: 1px solid #222;
+/* --- Main Content --- */
+main {
+    padding: 2rem;
 }
 
-.filters form {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.filters input,
-.filters select,
-.filters button {
-    padding: 10px 14px;
-    background: #111;
-    color: white;
-    border: 1px solid #222;
-}
-
-/* BRAND GRID */
-
-.brand-grid {
+/* --- Cars Grid --- */
+.cars-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
-    gap: 20px;
-    padding: 40px;
-}
-
-.brand-tile {
-    background: #111;
-    padding: 40px;
-    text-align: center;
-    font-weight: bold;
-    border: 1px solid #222;
-    text-decoration: none;
-    color: #c9a14a;
-}
-
-.brand-tile:hover {
-    background: #1a1a1a;
-}
-
-/* VEHICLE GRID */
-
-.car-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
-    gap: 30px;
-    padding: 40px;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
 }
 
 .car-card {
-    background: #111;
-    border: 1px solid #222;
-    border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: transform .25s;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .car-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
 .car-card img {
     width: 100%;
-    height: 220px;
+    height: 180px;
     object-fit: cover;
-}
-
-.car-card h3 {
-    padding: 15px;
-    margin: 0;
-}
-
-.car-card p {
-    padding: 0 15px;
-}
-
-.price {
-    color: #c9a14a;
-    font-weight: bold;
-}
-
-.view-btn {
-    display: block;
-    margin: 15px;
-    padding: 10px;
-    text-align: center;
-    border: 1px solid #c9a14a;
-    color: #c9a14a;
     border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.placeholder {
+    width: 100%;
+    height: 180px;
+    background: #d1d5db;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+/* --- Admin Form --- */
+.form-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.form-section h2 {
+    margin-bottom: 1rem;
+    color: #1f2937;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+}
+
+form input[type="text"],
+form input[type="number"],
+form textarea,
+form input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    margin-top: 0.25rem;
+}
+
+form button {
+    background: #3b82f6;
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.2s ease;
+}
+
+form button:hover {
+    background: #2563eb;
+}
+
+/* --- Cars Table --- */
+.cars-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cars-list th,
+.cars-list td {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    text-align: left;
+}
+
+.cars-list th {
+    background: #f3f4f6;
+    font-weight: 600;
+}
+
+.admin-img {
+    width: 80px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* --- Flash Messages --- */
+.flash-messages p {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.flash-messages .success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.flash-messages .error {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    padding: 1rem;
+    color: #6b7280;
+    margin-top: 2rem;
 }
