@@ -4,93 +4,51 @@
 
 <div class="container">
 
-    <h1 class="page-title">Available Vehicles</h1>
+  <h2 class="page-title">Available Vehicles</h2>
 
-    <!-- SEARCH -->
-    <form method="GET" action="/" class="search-form">
-        <input 
-            type="text" 
-            name="search" 
-            placeholder="Search brand or model..." 
-            value="{{ request.args.get('search', '') }}"
-        >
-        <button type="submit">Search</button>
-    </form>
+  <div class="cars-grid">
 
-    <!-- VEHICLE GRID -->
-    <div class="car-grid">
+    {% for car in cars %}
 
-        {% for car in cars %}
+      <a href="{{ url_for('car_page', car_id=car.id) }}" class="car-card">
 
-        <div class="car-card">
+        <div class="car-image">
 
-            <!-- IMAGE -->
-            <a href="{{ url_for('car_page', car_id=car.id) }}">
-
-                {% if car.images and car.images|length > 0 %}
-                    <img 
-                        src="{{ url_for('static', filename='uploads/' ~ car.images[0].filename) }}" 
-                        alt="{{ car.brand }} {{ car.model }}"
-                        class="car-image"
-                    >
-                {% else %}
-                    <img 
-                        src="{{ url_for('static', filename='no-image.png') }}" 
-                        alt="No image"
-                        class="car-image"
-                    >
-                {% endif %}
-
-            </a>
-
-            <!-- INFO -->
-            <div class="car-info">
-
-                <h3>{{ car.brand }} {{ car.model }}</h3>
-
-                <!-- SAFE PRICE -->
-                <p class="price">
-                    {% if car.price %}
-                        ₦{{ "{:,}".format(car.price|int) }}
-                    {% else %}
-                        Price on request
-                    {% endif %}
-                </p>
-
-                <p class="meta">
-                    {{ car.year or "—" }} • 
-                    {{ car.body_type or "—" }} • 
-                    {{ car.transmission or "—" }}
-                </p>
-
-                <!-- BUTTONS -->
-                <div class="card-actions">
-
-                    <a 
-                        href="{{ url_for('car_page', car_id=car.id) }}" 
-                        class="btn view-btn"
-                    >
-                        View Details
-                    </a>
-
-                    <a 
-                        href="{{ url_for('car_page', car_id=car.id) }}#contact" 
-                        class="btn enquire-btn"
-                    >
-                        Enquire
-                    </a>
-
-                </div>
-
-            </div>
+          {% if car.images and car.images|length > 0 %}
+            <img
+              src="{{ url_for('static', filename='uploads/cars/' ~ car.images[0].filename) }}"
+              alt="{{ car.title }}"
+            >
+          {% else %}
+            <img
+              src="{{ url_for('static', filename='img/no-image.png') }}"
+              alt="No image"
+            >
+          {% endif %}
 
         </div>
 
-        {% else %}
-            <p class="empty-msg">No vehicles found.</p>
-        {% endfor %}
+        <div class="car-info">
 
-    </div>
+          <h3>{{ car.title }}</h3>
+
+          <p class="brand">{{ car.brand }} • {{ car.model }}</p>
+
+          <p class="price">
+            {% if car.price %}
+              ₦{{ "{:,}".format(car.price|int) }}
+            {% else %}
+              Price on request
+            {% endif %}
+          </p>
+
+        </div>
+
+      </a>
+
+    {% endfor %}
+
+  </div>
 
 </div>
 
