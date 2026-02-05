@@ -1,61 +1,52 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin – Prestige Motors</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
 <body>
 
 <header>
-  <h1>Prestige Motors – Admin</h1>
-  <nav>
-    <a href="/">Home</a>
-  </nav>
+    <h1>Admin Dashboard</h1>
+    <a href="/" class="btn">Back Home</a>
 </header>
 
-<section class="admin-panel">
+<section class="admin-form">
 
-<h2>Add Vehicle</h2>
+    <form method="POST" enctype="multipart/form-data">
 
-<form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Car title" required>
 
-  <input name="title" placeholder="Vehicle Title" required>
+        <input type="number" name="price" placeholder="Price" required>
 
-  <input name="price" type="number" placeholder="Price ($)" required>
+        <textarea name="description" placeholder="Description"></textarea>
 
-  <textarea name="description" placeholder="Description"></textarea>
+        <input type="file" name="image">
 
-  <select name="brand" required>
-    {% for b in brands %}
-    <option value="{{ b.id }}">{{ b.name }}</option>
+        <button type="submit">Add Car</button>
+
+    </form>
+
+</section>
+
+<section class="grid">
+
+    {% for car in cars %}
+    <div class="card">
+
+        {% if car.image %}
+        <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+        {% endif %}
+
+        <h3>{{ car.title }}</h3>
+        <p>${{ car.price }}</p>
+
+        <a href="/delete/{{ car.id }}" class="danger">Delete</a>
+
+    </div>
     {% endfor %}
-  </select>
-
-  <select name="engine" required>
-    {% for e in engines %}
-    <option value="{{ e.id }}">{{ e.name }}</option>
-    {% endfor %}
-  </select>
-
-  <select name="fuel" required>
-    {% for f in fuels %}
-    <option value="{{ f.id }}">{{ f.name }}</option>
-    {% endfor %}
-  </select>
-
-  <select name="type" required>
-    {% for t in types %}
-    <option value="{{ t.id }}">{{ t.name }}</option>
-    {% endfor %}
-  </select>
-
-  <label>Images</label>
-  <input type="file" name="images" multiple required>
-
-  <button>Add Vehicle</button>
-
-</form>
 
 </section>
 
