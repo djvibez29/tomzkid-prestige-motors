@@ -1,101 +1,62 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Prestige Motors</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
 
-<form class="search-bar" method="get">
+<body>
 
-<input name="search" placeholder="Search..." value="{{ request.args.get('search','') }}">
+<header>
+  <h1>Prestige Motors</h1>
 
-<select name="brand">
-<option value="">Brand</option>
-{% for b in brands %}
-<option value="{{b.id}}">{{b.name}}</option>
-{% endfor %}
-</select>
+  <nav>
+    <a href="/">Home</a>
+    <a href="#">Favorites</a>
+    <a href="#">Reviews</a>
+    <a href="#">Settings</a>
+    <a href="/admin">Admin</a>
+  </nav>
 
-<select name="engine">
-<option value="">Engine</option>
-{% for e in engines %}
-<option value="{{e.id}}">{{e.name}}</option>
-{% endfor %}
-</select>
+</header>
 
-<select name="fuel">
-<option value="">Fuel</option>
-{% for f in fuels %}
-<option value="{{f.id}}">{{f.name}}</option>
-{% endfor %}
-</select>
-
-<select name="type">
-<option value="">Type</option>
-{% for t in types %}
-<option value="{{t.id}}">{{t.name}}</option>
-{% endfor %}
-</select>
-
-<input type="number" name="min_price" placeholder="Min $">
-<input type="number" name="max_price" placeholder="Max $">
-
-<select name="sort">
-<option value="">Newest</option>
-<option value="price_asc">Price ↑</option>
-<option value="price_desc">Price ↓</option>
-</select>
-
-<button>Apply</button>
-
-</form>
-
-<!-- ---------------- GRID ---------------- -->
-
-<div class="grid">
+<section class="grid">
 
 {% for car in cars %}
-<div class="car-card">
 
-{% if car.images %}
-<img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
-{% endif %}
+<div class="card">
 
-<h3>{{ car.title }}</h3>
+  {% if car.images %}
+  <img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
+  {% endif %}
 
-<p class="price">${{ "{:,}".format(car.price) }}</p>
+  <h3>{{ car.title }}</h3>
 
-<div class="meta">
-{{ car.brand.name }} • {{ car.engine.name }} • {{ car.fuel.name }}
-</div>
+  <p class="price">${{ "{:,}".format(car.price) }}</p>
 
-<div class="card-actions">
-
-<a href="/save/{{car.id}}" class="save-btn">
-{% if car.id in saved %}
-❤️ Saved
-{% else %}
-♡ Save
-{% endif %}
-</a>
+  <p>{{ car.brand.name }} · {{ car.engine.name }}</p>
 
 </div>
 
-</div>
 {% endfor %}
 
-</div>
+</section>
 
-<!-- ---------------- PAGINATION ---------------- -->
-
+{% if pagination %}
 <div class="pagination">
 
-{% if pagination.has_prev %}
-<a href="?page={{ pagination.prev_num }}">← Prev</a>
-{% endif %}
+  {% if pagination.has_prev %}
+    <a href="?page={{ pagination.prev_num }}">Prev</a>
+  {% endif %}
 
-<span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+  Page {{ pagination.page }} / {{ pagination.pages }}
 
-{% if pagination.has_next %}
-<a href="?page={{ pagination.next_num }}">Next →</a>
-{% endif %}
+  {% if pagination.has_next %}
+    <a href="?page={{ pagination.next_num }}">Next</a>
+  {% endif %}
 
 </div>
+{% endif %}
 
-{% endblock %}
+</body>
+</html>
