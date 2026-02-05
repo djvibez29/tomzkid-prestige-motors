@@ -1,108 +1,193 @@
+:root {
+    --black: #0b0b0b;
+    --white: #ffffff;
+    --red: #d62828;
+    --gold: #d4af37;
+    --gray: #f1f3f6;
+    --dark-gray: #444;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: system-ui, sans-serif;
+    font-family: Inter, system-ui, sans-serif;
 }
 
 body {
-    background: #f5f7fa;
-    color: #111;
+    background: var(--gray);
+    color: var(--black);
 }
 
+/* ---------------- NAV ---------------- */
+
 header {
-    background: white;
-    padding: 20px 40px;
+    background: var(--white);
+    border-bottom: 2px solid var(--gold);
+    padding: 18px 45px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 50;
 }
 
-h1 {
-    font-size: 24px;
+.logo {
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 1px;
 }
 
-.btn {
-    background: black;
-    color: white;
-    padding: 10px 18px;
+.logo span {
+    color: var(--red);
+}
+
+nav a {
+    margin-left: 26px;
+    font-weight: 600;
     text-decoration: none;
-    border-radius: 6px;
+    color: var(--black);
 }
+
+nav a:hover {
+    color: var(--red);
+}
+
+/* ---------------- HERO SEARCH ---------------- */
+
+.hero {
+    background: linear-gradient(white, #fafafa);
+    padding: 60px 45px;
+}
+
+.search-box {
+    max-width: 1200px;
+    margin: auto;
+    background: var(--white);
+    border-radius: 18px;
+    box-shadow: 0 15px 50px rgba(0,0,0,.08);
+    padding: 30px;
+}
+
+.search-box form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 15px;
+}
+
+.search-box input,
+.search-box select {
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+}
+
+.search-btn {
+    background: var(--red);
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* ---------------- GRID ---------------- */
+
+.market {
+    padding: 50px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 35px;
+}
+
+.filters {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 16px;
+    border: 1px solid var(--gold);
+    height: fit-content;
+}
+
+.filters h3 {
+    margin-bottom: 20px;
+}
+
+.filters label {
+    font-weight: 600;
+    margin-top: 14px;
+    display: block;
+}
+
+.filters select {
+    width: 100%;
+    padding: 10px;
+}
+
+/* ---------------- CAR GRID ---------------- */
 
 .grid {
-    padding: 40px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 30px;
 }
 
 .card {
     background: white;
-    border-radius: 14px;
+    border-radius: 18px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.07);
+    transition: .2s;
+    box-shadow: 0 10px 30px rgba(0,0,0,.07);
+}
+
+.card:hover {
+    transform: translateY(-6px);
 }
 
 .card img {
-    width: 100%;
     height: 190px;
+    width: 100%;
     object-fit: cover;
 }
 
-.no-img {
-    height: 190px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #ddd;
-}
-
-.card h3 {
-    padding: 12px;
+.card-body {
+    padding: 18px;
 }
 
 .price {
-    padding: 0 12px;
-    font-weight: bold;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--red);
 }
 
-.card p {
-    padding: 0 12px 14px;
+/* ---------------- BUTTONS ---------------- */
+
+.primary {
+    background: var(--red);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    text-decoration: none;
 }
+
+.gold {
+    border: 2px solid var(--gold);
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+/* ---------------- ADMIN ---------------- */
 
 .admin-form {
-    padding: 30px 40px;
+    padding: 40px;
 }
 
 .admin-form form {
-    max-width: 600px;
+    max-width: 700px;
+    background: white;
+    padding: 25px;
+    border-radius: 18px;
+    border: 2px solid var(--gold);
     display: grid;
     gap: 15px;
-}
-
-.admin-form input,
-.admin-form textarea {
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-}
-
-.admin-form button {
-    background: black;
-    color: white;
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.danger {
-    display: block;
-    background: crimson;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    text-decoration: none;
 }
