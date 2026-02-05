@@ -1,54 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Admin</title>
+{% extends "base.html" %}
+{% block content %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+<div class="admin-form">
 
-<header>
-    <h1>Admin Dashboard</h1>
-    <a href="/" class="btn">Back Home</a>
-</header>
+<h2>Add Vehicle</h2>
 
-<section class="admin-form">
+<form method="POST" enctype="multipart/form-data">
 
-    <form method="POST" enctype="multipart/form-data">
+<input name="title" placeholder="Title" required>
+<input name="price" type="number" required>
 
-        <input type="text" name="title" placeholder="Car title" required>
+<textarea name="description"></textarea>
 
-        <input type="number" name="price" placeholder="Price" required>
+<input type="file" name="images" multiple required>
 
-        <textarea name="description" placeholder="Description"></textarea>
+<button class="primary">Upload</button>
 
-        <input type="file" name="image">
+</form>
 
-        <button type="submit">Add Car</button>
+</div>
 
-    </form>
-
-</section>
-
-<section class="grid">
-
-    {% for car in cars %}
-    <div class="card">
-
-        {% if car.image %}
-        <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
-        {% endif %}
-
-        <h3>{{ car.title }}</h3>
-        <p>${{ car.price }}</p>
-
-        <a href="/delete/{{ car.id }}" class="danger">Delete</a>
-
-    </div>
-    {% endfor %}
-
-</section>
-
-</body>
-</html>
+{% endblock %}
