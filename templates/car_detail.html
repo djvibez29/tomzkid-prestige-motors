@@ -1,18 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>{{ car.name }}</h1>
+<div class="detail">
 
-<img src="{{ url_for('static', filename='uploads/' + car.image) }}" width="520">
+<h1>{{ car.title }}</h1>
 
-<p><strong>Brand:</strong> {{ car.brand }}</p>
-<p><strong>Price:</strong> ${{ "{:,}".format(car.price_usd) }}</p>
-<p><strong>Miles:</strong> {{ "{:,}".format(car.miles) }}</p>
-
-<hr>
+<div class="gallery">
+{% for img in car.images %}
+<img src="{{ url_for('static', filename='uploads/cars/' + img.filename) }}">
+{% endfor %}
+</div>
 
 <p>{{ car.description }}</p>
+<h2>${{ car.price }}</h2>
 
-<a href="/">← Back to inventory</a>
+</div>
 
 {% endblock %}
