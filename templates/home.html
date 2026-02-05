@@ -1,33 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Car Marketplace</title>
+{% extends "base.html" %}
+{% block content %}
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+<section class="market">
+<div class="grid">
 
-<header>
-    <h1>Vehicle Marketplace</h1>
-    <a href="/admin" class="btn">Admin Panel</a>
-</header>
+{% for car in cars %}
+<div class="card">
 
-<section class="grid">
-    {% for car in cars %}
-    <div class="card">
-        {% if car.image %}
-        <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
-        {% else %}
-        <div class="no-img">No Image</div>
-        {% endif %}
+<a href="{{ url_for('car_detail', car_id=car.id) }}">
 
-        <h3>{{ car.title }}</h3>
-        <p class="price">${{ car.price }}</p>
-        <p>{{ car.description }}</p>
-    </div>
-    {% endfor %}
+{% if car.images %}
+<img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
+{% endif %}
+
+</a>
+
+<div class="card-body">
+<h3>{{ car.title }}</h3>
+<p class="price">${{ car.price }}</p>
+
+<a href="{{ url_for('favorite', car_id=car.id) }}" class="gold">❤️ Save</a>
+
+</div>
+</div>
+{% endfor %}
+
+</div>
 </section>
 
-</body>
-</html>
+<div class="pagination">
+{% if pagination.has_prev %}
+<a href="?page={{ pagination.prev_num }}">Prev</a>
+{% endif %}
+
+{{ pagination.page }}
+
+{% if pagination.has_next %}
+<a href="?page={{ pagination.next_num }}">Next</a>
+{% endif %}
+</div>
+
+{% endblock %}
