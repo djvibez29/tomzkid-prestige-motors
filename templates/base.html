@@ -1,22 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>Prestige Motors</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
 <header>
-    <div class="logo">PrestigeMotors</div>
+    <div class="logo">Prestige<span>Motors</span></div>
     <nav>
-        <a href="/">Home</a>
-        <a href="/admin">Admin</a>
+        <a href="/">Buy</a>
+        {% if current_user.is_authenticated %}
+            <a href="/logout">Logout</a>
+            <a href="/admin">Admin</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        {% endif %}
     </nav>
 </header>
 
-<main>
 {% block content %}{% endblock %}
-</main>
 
 </body>
 </html>
