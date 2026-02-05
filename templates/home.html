@@ -1,44 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Marketplace</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <header>
-        <h1>🚗 Car Marketplace</h1>
-        <nav>
-            <a href="{{ url_for('home') }}">Home</a>
-            <a href="{{ url_for('admin') }}">Admin</a>
-        </nav>
-    </header>
+{% extends "base.html" %}
 
-    <main>
-        {% if cars %}
-        <div class="cars-grid">
-            {% for car in cars %}
-            <div class="car-card">
-                {% if car.image_filename %}
-                <img src="{{ url_for('static', filename='uploads/cars/' + car.image_filename) }}" alt="{{ car.title }}">
-                {% else %}
-                <div class="placeholder">No Image</div>
-                {% endif %}
-                <h2>{{ car.title }}</h2>
-                <p><strong>Brand:</strong> {{ car.brand }}</p>
-                <p><strong>Price:</strong> ${{ "%.2f"|format(car.price) }}</p>
-                <p>{{ car.description }}</p>
-            </div>
+{% block content %}
+
+<div class="search-bar">
+    <form method="get">
+        <input type="text" name="search" placeholder="Search cars...">
+        <select name="brand">
+            <option value="">All Brands</option>
+            {% for b in brands %}
+            <option value="{{ b.id }}">{{ b.name }}</option>
             {% endfor %}
-        </div>
-        {% else %}
-        <p class="no-cars">No cars available at the moment.</p>
-        {% endif %}
-    </main>
+        </select>
+        <button>Search</button>
+    </form>
+</div>
 
-    <footer>
-        <p>&copy; {{ current_year }} Car Marketplace. All rights reserved.</p>
-    </footer>
-</body>
-</html>
+<div class="grid">
+
+{% for car in cars %}
+<div class="car-card">
+
+    {% if car.images %}
+        <img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
+    {% else %}
+        <div class="no-img">No Image</div>
+    {% endif %}
+
+    <h3>{{ car.title }}</h3>
+    <p class="price">${{ "{:,}".format(car.price) }}</p>
+
+    <div class="meta">
+        {{ car.brand.name }} • {{ car.engine.name }} • {{ car.drivetrain.name }}
+    </div>
+
+</div>
+{% endfor %}
+
+</div>
+
+{% endblock %}
