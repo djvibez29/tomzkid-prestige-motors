@@ -1,40 +1,63 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin – Prestige Motors</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<header>
+  <h1>Prestige Motors – Admin</h1>
+  <nav>
+    <a href="/">Home</a>
+  </nav>
+</header>
+
+<section class="admin-panel">
 
 <h2>Add Vehicle</h2>
 
-<form method="post" enctype="multipart/form-data" class="admin-form">
+<form method="POST" enctype="multipart/form-data">
 
-<input name="title" placeholder="Title" required>
-<input name="price" type="number" placeholder="Price" required>
+  <input name="title" placeholder="Vehicle Title" required>
 
-<textarea name="description" placeholder="Description"></textarea>
+  <input name="price" type="number" placeholder="Price ($)" required>
 
-<select name="brand">
-{% for b in brands %}<option value="{{b.id}}">{{b.name}}</option>{% endfor %}
-</select>
+  <textarea name="description" placeholder="Description"></textarea>
 
-<select name="engine">
-{% for e in engines %}<option value="{{e.id}}">{{e.name}}</option>{% endfor %}
-</select>
+  <select name="brand" required>
+    {% for b in brands %}
+    <option value="{{ b.id }}">{{ b.name }}</option>
+    {% endfor %}
+  </select>
 
-<select name="drivetrain">
-{% for d in drivetrains %}<option value="{{d.id}}">{{d.name}}</option>{% endfor %}
-</select>
+  <select name="engine" required>
+    {% for e in engines %}
+    <option value="{{ e.id }}">{{ e.name }}</option>
+    {% endfor %}
+  </select>
 
-<select name="fuel">
-{% for f in fuels %}<option value="{{f.id}}">{{f.name}}</option>{% endfor %}
-</select>
+  <select name="fuel" required>
+    {% for f in fuels %}
+    <option value="{{ f.id }}">{{ f.name }}</option>
+    {% endfor %}
+  </select>
 
-<select name="type">
-{% for t in types %}<option value="{{t.id}}">{{t.name}}</option>{% endfor %}
-</select>
+  <select name="type" required>
+    {% for t in types %}
+    <option value="{{ t.id }}">{{ t.name }}</option>
+    {% endfor %}
+  </select>
 
-<label>Images</label>
-<input type="file" name="images" multiple>
+  <label>Images</label>
+  <input type="file" name="images" multiple required>
 
-<button>Add Car</button>
+  <button>Add Vehicle</button>
 
 </form>
 
-{% endblock %}
+</section>
+
+</body>
+</html>
