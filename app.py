@@ -1,59 +1,47 @@
-import os
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
-from sqlalchemy import asc, desc
+import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-key")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASE_DIR, "cars.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads/cars")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
-# ---------------------------------------------------
-# MODELS
-# ---------------------------------------------------
+# ---------------- MODELS ---------------- #
 
 class Brand(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(50))
 
 
 class EngineType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(50))
 
 
 class FuelType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(50))
 
 
 class VehicleType(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-
-
-class CarImage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(200))
-    car_id = db.Column(db.Integer, db.ForeignKey("car.id"))
+    name = db.Column(db.String(50))
 
 
 class Car(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
-    title = db.Column(db.String(200))
+    title = db.Column(db.String(120))
     price = db.Column(db.Integer)
     description = db.Column(db.Text)
 
@@ -67,110 +55,45 @@ class Car(db.Model):
     fuel = db.relationship("FuelType")
     type = db.relationship("VehicleType")
 
-    images = db.relationship("CarImage", cascade="all,delete")
+
+class CarImage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(200))
+    car_id = db.Column(db.Integer, db.ForeignKey("car.id"))
+
+    car = db.relationship("Car", backref="images")
 
 
-# ---------------------------------------------------
-# CREATE TABLES
-# ---------------------------------------------------
-
-with app.app_context():
-    db.create_all()
-
-
-# ---------------------------------------------------
-# HOME (SEARCH + FILTER + PAGINATION)
-# ---------------------------------------------------
+# ---------------- ROUTES ---------------- #
 
 @app.route("/")
 def home():
-
-    query = Car.query
-
-    search = request.args.get("search")
-    if search:
-        query = query.filter(Car.title.ilike(f"%{search}%"))
-
-    brand = request.args.get("brand")
-    if brand:
-        query = query.filter(Car.brand_id == brand)
-
-    engine = request.args.get("engine")
-    if engine:
-        query = query.filter(Car.engine_id == engine)
-
-    fuel = request.args.get("fuel")
-    if fuel:
-        query = query.filter(Car.fuel_id == fuel)
-
-    vtype = request.args.get("type")
-    if vtype:
-        query = query.filter(Car.type_id == vtype)
-
-    min_price = request.args.get("min_price")
-    if min_price:
-        query = query.filter(Car.price >= min_price)
-
-    max_price = request.args.get("max_price")
-    if max_price:
-        query = query.filter(Car.price <= max_price)
-
-    sort = request.args.get("sort")
-
-    if sort == "price_asc":
-        query = query.order_by(asc(Car.price))
-    elif sort == "price_desc":
-        query = query.order_by(desc(Car.price))
-    else:
-        query = query.order_by(desc(Car.id))
-
     page = request.args.get("page", 1, type=int)
-    pagination = query.paginate(page=page, per_page=12)
 
-    cars = pagination.items
+    pagination = Car.query.order_by(Car.id.desc()).paginate(page=page, per_page=12)
 
-    saved = session.get("saved", [])
+    brands = Brand.query.all()
 
     return render_template(
         "home.html",
-        cars=cars,
+        cars=pagination.items,
         pagination=pagination,
-        saved=saved,
-        brands=Brand.query.all(),
-        engines=EngineType.query.all(),
-        fuels=FuelType.query.all(),
-        types=VehicleType.query.all(),
+        brands=brands
     )
 
-
-# ---------------------------------------------------
-# SAVE LISTING
-# ---------------------------------------------------
-
-@app.route("/save/<int:car_id>")
-def save_car(car_id):
-
-    saved = session.get("saved", [])
-
-    if car_id not in saved:
-        saved.append(car_id)
-
-    session["saved"] = saved
-
-    return redirect(request.referrer or "/")
-
-
-# ---------------------------------------------------
-# ADMIN UPLOAD
-# ---------------------------------------------------
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
 
+    brands = Brand.query.all()
+    engines = EngineType.query.all()
+    fuels = FuelType.query.all()
+    types = VehicleType.query.all()
+
     if request.method == "POST":
 
         title = request.form["title"]
-        price = request.form["price"]
+        price = int(request.form["price"])
         description = request.form["description"]
 
         brand_id = request.form["brand"]
@@ -191,30 +114,56 @@ def admin():
         db.session.add(car)
         db.session.commit()
 
-        images = request.files.getlist("images")
+        files = request.files.getlist("images")
 
-        for image in images:
-            if image.filename:
-                filename = secure_filename(image.filename)
+        for file in files:
+            if file.filename:
+                filename = secure_filename(file.filename)
                 path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-                image.save(path)
+                file.save(path)
 
-                db.session.add(CarImage(filename=filename, car_id=car.id))
+                img = CarImage(filename=filename, car_id=car.id)
+                db.session.add(img)
 
         db.session.commit()
 
-        return redirect("/admin")
+        return redirect(url_for("admin"))
 
     return render_template(
         "admin.html",
-        brands=Brand.query.all(),
-        engines=EngineType.query.all(),
-        fuels=FuelType.query.all(),
-        types=VehicleType.query.all(),
+        brands=brands,
+        engines=engines,
+        fuels=fuels,
+        types=types
     )
 
 
-# ---------------------------------------------------
+@app.route("/seed")
+def seed():
+
+    if Brand.query.first():
+        return "Already seeded."
+
+    brands = ["Lamborghini", "Ferrari", "Mercedes", "BMW", "Porsche"]
+    engines = ["V6", "V8", "V10", "V12", "Inline-6", "Electric"]
+    fuels = ["Petrol", "Diesel", "Hybrid", "Electric"]
+    types = ["Sedan", "Coupe", "SUV", "Convertible", "Hypercar"]
+
+    for b in brands:
+        db.session.add(Brand(name=b))
+    for e in engines:
+        db.session.add(EngineType(name=e))
+    for f in fuels:
+        db.session.add(FuelType(name=f))
+    for t in types:
+        db.session.add(VehicleType(name=t))
+
+    db.session.commit()
+
+    return "Seeded successfully ✅"
+
 
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
