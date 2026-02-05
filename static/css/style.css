@@ -1,52 +1,80 @@
-body {
+* {
+    box-sizing: border-box;
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+}
+
+body {
     background: #f5f7fa;
+    color: #111;
 }
 
 header {
     background: white;
-    padding: 15px 40px;
+    padding: 18px 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
     display: flex;
     justify-content: space-between;
-    border-bottom: 1px solid #ddd;
+    align-items: center;
 }
 
 .logo {
+    font-size: 24px;
     font-weight: 700;
-    font-size: 22px;
 }
 
 nav a {
     margin-left: 20px;
     text-decoration: none;
-    color: black;
+    color: #333;
+    font-weight: 500;
 }
 
 .search-bar {
     background: white;
-    padding: 20px;
-    margin: 20px;
-    border-radius: 8px;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(130px,1fr));
+    gap: 12px;
+    border-radius: 12px;
+    margin: 25px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.06);
 }
 
 .search-bar input,
-.search-bar select {
-    padding: 10px;
+.search-bar select,
+.search-bar button {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.search-bar button {
+    background: #0a58ff;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
-    gap: 20px;
-    padding: 20px;
+    grid-template-columns: repeat(auto-fill,minmax(270px,1fr));
+    gap: 24px;
+    padding: 30px;
 }
 
 .car-card {
     background: white;
-    border-radius: 10px;
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 3px 10px rgba(0,0,0,.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    transition: .25s;
+}
+
+.car-card:hover {
+    transform: translateY(-6px);
 }
 
 .car-card img {
@@ -55,28 +83,43 @@ nav a {
     object-fit: cover;
 }
 
+.car-card h3 {
+    padding: 12px 14px 4px;
+}
+
 .price {
-    font-weight: bold;
-    color: green;
+    padding: 0 14px;
+    color: #0a58ff;
+    font-weight: 700;
 }
 
 .meta {
-    font-size: 13px;
-    opacity: .7;
+    padding: 6px 14px;
+    color: #666;
+    font-size: 14px;
 }
 
-.admin-form {
-    max-width: 600px;
-    margin: 40px auto;
+.card-actions {
+    padding: 12px 14px 16px;
+}
+
+.save-btn {
+    text-decoration: none;
+    font-weight: 600;
+    color: #0a58ff;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 40px;
+}
+
+.pagination a {
+    padding: 10px 16px;
     background: white;
-    padding: 25px;
-    border-radius: 8px;
-}
-
-.admin-form input,
-.admin-form select,
-.admin-form textarea {
-    width: 100%;
-    margin-bottom: 15px;
-    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
 }
