@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Tomzkid Prestige Motors{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Prestige Motors</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<header class="navbar">
-    <h1 class="logo">Tomzkid Prestige Motors</h1>
+<header>
+    <div class="logo">PrestigeMotors</div>
     <nav>
         <a href="/">Home</a>
         <a href="/admin">Admin</a>
@@ -16,12 +15,8 @@
 </header>
 
 <main>
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 </main>
-
-<footer>
-    <p>© 2026 Tomzkid Prestige Motors</p>
-</footer>
 
 </body>
 </html>
