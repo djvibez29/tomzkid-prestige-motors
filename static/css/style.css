@@ -1,181 +1,82 @@
-/* --- General Reset --- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
 body {
-    background: #f4f6f8;
-    color: #333;
-    line-height: 1.6;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fa;
 }
 
-/* --- Header --- */
 header {
-    background: #1f2937;
-    color: #fff;
-    padding: 1rem 2rem;
+    background: white;
+    padding: 15px 40px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    border-bottom: 1px solid #ddd;
 }
 
-header h1 {
-    font-size: 1.8rem;
+.logo {
+    font-weight: 700;
+    font-size: 22px;
 }
 
-header nav a {
-    color: #fff;
+nav a {
+    margin-left: 20px;
     text-decoration: none;
-    margin-left: 1rem;
-    font-weight: 500;
-    transition: color 0.2s ease;
+    color: black;
 }
 
-header nav a:hover {
-    color: #60a5fa;
+.search-bar {
+    background: white;
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
 }
 
-/* --- Main Content --- */
-main {
-    padding: 2rem;
+.search-bar input,
+.search-bar select {
+    padding: 10px;
 }
 
-/* --- Cars Grid --- */
-.cars-grid {
+.grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+    padding: 20px;
 }
 
 .car-card {
-    background: #fff;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.car-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,.1);
 }
 
 .car-card img {
     width: 100%;
-    height: 180px;
+    height: 190px;
     object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
 }
 
-.placeholder {
-    width: 100%;
-    height: 180px;
-    background: #d1d5db;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6b7280;
+.price {
     font-weight: bold;
-    margin-bottom: 0.5rem;
+    color: green;
 }
 
-/* --- Admin Form --- */
-.form-section {
-    background: #fff;
-    padding: 1.5rem;
+.meta {
+    font-size: 13px;
+    opacity: .7;
+}
+
+.admin-form {
+    max-width: 600px;
+    margin: 40px auto;
+    background: white;
+    padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
 }
 
-.form-section h2 {
-    margin-bottom: 1rem;
-    color: #1f2937;
-}
-
-form label {
-    display: block;
-    margin-bottom: 0.75rem;
-    font-weight: 500;
-}
-
-form input[type="text"],
-form input[type="number"],
-form textarea,
-form input[type="file"] {
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
     width: 100%;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    margin-top: 0.25rem;
-}
-
-form button {
-    background: #3b82f6;
-    color: #fff;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-top: 1rem;
-    transition: background 0.2s ease;
-}
-
-form button:hover {
-    background: #2563eb;
-}
-
-/* --- Cars Table --- */
-.cars-list table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.cars-list th,
-.cars-list td {
-    padding: 0.75rem;
-    border: 1px solid #e5e7eb;
-    text-align: left;
-}
-
-.cars-list th {
-    background: #f3f4f6;
-    font-weight: 600;
-}
-
-.admin-img {
-    width: 80px;
-    height: 50px;
-    object-fit: cover;
-    border-radius: 4px;
-}
-
-/* --- Flash Messages --- */
-.flash-messages p {
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    margin-bottom: 0.5rem;
-}
-
-.flash-messages .success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.flash-messages .error {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-/* --- Footer --- */
-footer {
-    text-align: center;
-    padding: 1rem;
-    color: #6b7280;
-    margin-top: 2rem;
+    margin-bottom: 15px;
+    padding: 10px;
 }
