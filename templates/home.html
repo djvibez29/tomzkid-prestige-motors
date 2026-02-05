@@ -1,62 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Prestige Motors</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
+    <meta charset="UTF-8">
+    <title>Car Marketplace</title>
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
 <body>
 
 <header>
-  <h1>Prestige Motors</h1>
-
-  <nav>
-    <a href="/">Home</a>
-    <a href="#">Favorites</a>
-    <a href="#">Reviews</a>
-    <a href="#">Settings</a>
-    <a href="/admin">Admin</a>
-  </nav>
-
+    <h1>Vehicle Marketplace</h1>
+    <a href="/admin" class="btn">Admin Panel</a>
 </header>
 
 <section class="grid">
+    {% for car in cars %}
+    <div class="card">
+        {% if car.image %}
+        <img src="{{ url_for('static', filename='uploads/' + car.image) }}">
+        {% else %}
+        <div class="no-img">No Image</div>
+        {% endif %}
 
-{% for car in cars %}
-
-<div class="card">
-
-  {% if car.images %}
-  <img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
-  {% endif %}
-
-  <h3>{{ car.title }}</h3>
-
-  <p class="price">${{ "{:,}".format(car.price) }}</p>
-
-  <p>{{ car.brand.name }} · {{ car.engine.name }}</p>
-
-</div>
-
-{% endfor %}
-
+        <h3>{{ car.title }}</h3>
+        <p class="price">${{ car.price }}</p>
+        <p>{{ car.description }}</p>
+    </div>
+    {% endfor %}
 </section>
-
-{% if pagination %}
-<div class="pagination">
-
-  {% if pagination.has_prev %}
-    <a href="?page={{ pagination.prev_num }}">Prev</a>
-  {% endif %}
-
-  Page {{ pagination.page }} / {{ pagination.pages }}
-
-  {% if pagination.has_next %}
-    <a href="?page={{ pagination.next_num }}">Next</a>
-  {% endif %}
-
-</div>
-{% endif %}
 
 </body>
 </html>
