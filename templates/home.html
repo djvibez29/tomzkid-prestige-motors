@@ -1,43 +1,45 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<section class="market">
-<div class="grid">
+<section class="vehicle-grid">
 
-{% for car in cars %}
-<div class="card">
+  {% for car in vehicles %}
 
-<a href="{{ url_for('car_detail', car_id=car.id) }}">
+  <div class="car-card">
+    <img src="{{ url_for('static', filename='uploads/cars/' ~ car.image_main) }}" />
 
-{% if car.images %}
-<img src="{{ url_for('static', filename='uploads/cars/' + car.images[0].filename) }}">
-{% endif %}
+    <h3>{{ car.title }}</h3>
+    <p class="price">${{ "{:,}".format(car.price) }}</p>
 
-</a>
+    <p>{{ car.engine }} • {{ car.drivetrain }} • {{ car.fuel }}</p>
 
-<div class="card-body">
-<h3>{{ car.title }}</h3>
-<p class="price">${{ car.price }}</p>
+  </div>
 
-<a href="{{ url_for('favorite', car_id=car.id) }}" class="gold">❤️ Save</a>
+  {% else %}
+  <p>No vehicles yet.</p>
+  {% endfor %}
 
-</div>
-</div>
-{% endfor %}
-
-</div>
 </section>
 
+<!-- PAGINATION -->
+
+{% if pagination.pages > 1 %}
+
 <div class="pagination">
-{% if pagination.has_prev %}
-<a href="?page={{ pagination.prev_num }}">Prev</a>
-{% endif %}
 
-{{ pagination.page }}
+  {% if pagination.has_prev %}
+  <a href="{{ url_for('home', page=pagination.prev_num) }}">← Prev</a>
+  {% endif %}
 
-{% if pagination.has_next %}
-<a href="?page={{ pagination.next_num }}">Next</a>
-{% endif %}
+  <span>Page {{ pagination.page }} of {{ pagination.pages }}</span>
+
+  {% if pagination.has_next %}
+  <a href="{{ url_for('home', page=pagination.next_num) }}">Next →</a>
+  {% endif %}
+
 </div>
+
+{% endif %}
 
 {% endblock %}
