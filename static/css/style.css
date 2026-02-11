@@ -147,3 +147,22 @@ button:hover {
     width:100%;
     border-radius:18px;
 }
+
+.admin-table {
+    width:100%;
+    border-collapse:collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    border-bottom:1px solid #ddd;
+    padding:12px;
+}
+
+.admin-table img {
+    border-radius:10px;
+}
+
+form {
+    margin-bottom:40px;
+}
