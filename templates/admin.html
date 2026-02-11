@@ -1,48 +1,75 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<h1 class="page-title">Admin Dashboard</h1>
+<h1>Admin Panel</h1>
 
-<section class="admin-add">
+<hr>
 
-<form action="/admin/add" method="POST">
+<h2>Add Vehicle</h2>
 
-    <input name="title" placeholder="Vehicle title" required>
+<form method="POST" action="/admin/add" enctype="multipart/form-data">
 
-    <input name="price" placeholder="Price" required>
+<input name="title" placeholder="Title" required>
 
-    <input name="year" placeholder="Year">
+<input name="price" placeholder="Price" required>
 
-    <input name="mileage" placeholder="Mileage">
+<input name="year" placeholder="Year">
 
-    <input name="image_url" placeholder="Image URL">
+<input name="mileage" placeholder="Mileage">
 
-    <button>Add Vehicle</button>
+<input type="file" name="image">
+
+<button>Add Vehicle</button>
 
 </form>
 
-</section>
+<hr>
 
+<h2>Bulk Upload CSV</h2>
 
-<div class="grid">
+<form method="POST" action="/admin/upload-csv" enctype="multipart/form-data">
+
+<input type="file" name="csv" required>
+
+<button>Upload CSV</button>
+
+</form>
+
+<hr>
+
+<h2>Current Inventory</h2>
+
+<table class="admin-table">
+
+<tr>
+<th>Image</th>
+<th>Title</th>
+<th>Price</th>
+<th>Delete</th>
+</tr>
 
 {% for v in vehicles %}
 
-<div class="card">
+<tr>
 
-<img src="{{ v.image_url }}">
+<td>
+{% if v.image_url %}
+<img src="{{ v.image_url }}" width="120">
+{% endif %}
+</td>
 
-<h3>{{ v.title }}</h3>
+<td>{{ v.title }}</td>
 
-<p>${{ "{:,}".format(v.price) }}</p>
+<td>${{ "{:,}".format(v.price) }}</td>
 
-<a class="danger" href="/admin/delete/{{ v.id }}">Delete</a>
+<td>
+<a href="/admin/delete/{{ v.id }}">❌</a>
+</td>
 
-</div>
+</tr>
 
 {% endfor %}
 
-</div>
+</table>
 
 {% endblock %}
