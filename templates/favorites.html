@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Your Favorites</h1>
+
+<div class="grid">
+
+{% for v in vehicles %}
+
+<div class="card">
+
+<img src="{{ v.image_url }}">
+
+<h3>{{ v.title }}</h3>
+
+<p>${{ "{:,}".format(v.price) }}</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}
