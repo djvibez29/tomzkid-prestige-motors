@@ -1,22 +1,47 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<div class="admin-form">
+<h1 class="page-title">Admin Dashboard</h1>
 
-<h2>Add Vehicle</h2>
+<section class="admin-add">
 
-<form method="POST" enctype="multipart/form-data">
+<form action="/admin/add" method="POST">
 
-<input name="title" placeholder="Title" required>
-<input name="price" type="number" required>
+    <input name="title" placeholder="Vehicle title" required>
 
-<textarea name="description"></textarea>
+    <input name="price" placeholder="Price" required>
 
-<input type="file" name="images" multiple required>
+    <input name="year" placeholder="Year">
 
-<button class="primary">Upload</button>
+    <input name="mileage" placeholder="Mileage">
+
+    <input name="image_url" placeholder="Image URL">
+
+    <button>Add Vehicle</button>
 
 </form>
+
+</section>
+
+
+<div class="grid">
+
+{% for v in vehicles %}
+
+<div class="card">
+
+<img src="{{ v.image_url }}">
+
+<h3>{{ v.title }}</h3>
+
+<p>${{ "{:,}".format(v.price) }}</p>
+
+<a class="danger" href="/admin/delete/{{ v.id }}">Delete</a>
+
+</div>
+
+{% endfor %}
 
 </div>
 
