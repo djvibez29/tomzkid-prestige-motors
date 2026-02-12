@@ -59,19 +59,26 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-    # 🔥 AUTO CREATE ADMIN IF NONE EXISTS
-    if not User.query.filter_by(role="admin").first():
+    # 🔥 FORCE ADMIN CREATION / PROMOTION
+    ADMIN_EMAIL = "tomzkidprestigegroups@gmail.com"
+    ADMIN_PASSWORD = "OGTomzkid 29"
 
-        admin_email = os.environ.get("ADMIN_EMAIL")
-        admin_password = os.environ.get("ADMIN_PASSWORD")
+    admin = User.query.filter_by(email=ADMIN_EMAIL).first()
 
-        if admin_email and admin_password:
-            admin = User(
-                email=admin_email,
-                password_hash=generate_password_hash(admin_password),
-                role="admin",
-            )
-            db.session.add(admin)
+    if not admin:
+        # Create admin if not exists
+        admin = User(
+            email=ADMIN_EMAIL,
+            password_hash=generate_password_hash(ADMIN_PASSWORD),
+            role="admin",
+        )
+        db.session.add(admin)
+        db.session.commit()
+
+    else:
+        # Promote if exists but not admin
+        if admin.role != "admin":
+            admin.role = "admin"
             db.session.commit()
 
 
@@ -237,7 +244,7 @@ def approve_vehicle(id):
 
 @app.route("/admin/promote/<int:id>")
 @login_required
-def promote_dealer(id):
+def promote_user(id):
 
     if current_user.role != "admin":
         return redirect("/")
