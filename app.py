@@ -1,14 +1,11 @@
 import os
-import csv
 from werkzeug.utils import secure_filename
 
 from flask import (
     Flask,
     render_template,
     redirect,
-    url_for,
     request,
-    flash,
 )
 
 from flask_login import (
@@ -18,27 +15,25 @@ from flask_login import (
     current_user,
 )
 
-from werkzeug.security import check_password_hash
+from werkzeug.security import (
+    check_password_hash,
+    generate_password_hash,
+)
 
 from extensions import db, login_manager
 from models import User, Vehicle
 
 
-# ---------------------------------
-# CONFIG
-# ---------------------------------
+# ---------------- CONFIG ----------------
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
-ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp"}
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
 db_url = os.environ.get("DATABASE_URL")
 
@@ -47,13 +42,10 @@ if db_url and db_url.startswith("postgres://"):
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///local.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
-# ---------------------------------
-# INIT
-# ---------------------------------
+# ---------------- INIT ----------------
 
 db.init_app(app)
 login_manager.init_app(app)
@@ -68,48 +60,44 @@ with app.app_context():
     db.create_all()
 
 
-# ---------------------------------
-# HOME + SEARCH
-# ---------------------------------
+# ---------------- HOME ----------------
 
 @app.route("/")
 def home():
 
-    page = request.args.get("page", 1, type=int)
-
-    query = Vehicle.query
-
-    q = request.args.get("q")
-
-    if q:
-        query = query.filter(Vehicle.title.ilike(f"%{q}%"))
-
-    pagination = query.order_by(
+    vehicles = Vehicle.query.filter_by(
+        is_approved=True
+    ).order_by(
         Vehicle.created_at.desc()
-    ).paginate(page=page, per_page=12)
+    ).all()
 
-    return render_template(
-        "home.html",
-        vehicles=pagination.items,
-        pagination=pagination,
-    )
+    return render_template("home.html", vehicles=vehicles)
 
 
-# ---------------------------------
-# VEHICLE PAGE
-# ---------------------------------
+# ---------------- REGISTER DEALER ----------------
 
-@app.route("/vehicle/<int:vehicle_id>")
-def vehicle_detail(vehicle_id):
+@app.route("/register", methods=["GET", "POST"])
+def register():
 
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    if request.method == "POST":
 
-    return render_template("vehicle_detail.html", vehicle=vehicle)
+        user = User(
+            email=request.form["email"],
+            password_hash=generate_password_hash(
+                request.form["password"]
+            ),
+            role="dealer",
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        return redirect("/login")
+
+    return render_template("register.html")
 
 
-# ---------------------------------
-# LOGIN
-# ---------------------------------
+# ---------------- LOGIN ----------------
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -125,7 +113,12 @@ def login():
             request.form["password"],
         ):
             login_user(user)
-            return redirect("/admin")
+
+            if user.role == "admin":
+                return redirect("/admin")
+
+            if user.role == "dealer":
+                return redirect("/dealer")
 
     return render_template("login.html")
 
@@ -137,126 +130,90 @@ def logout():
     return redirect("/")
 
 
-# ---------------------------------
-# ADMIN DASHBOARD
-# ---------------------------------
+# ---------------- DEALER DASHBOARD ----------------
 
-@app.route("/admin")
+@app.route("/dealer")
 @login_required
-def admin():
+def dealer_dashboard():
 
-    if not current_user.is_admin:
+    if current_user.role != "dealer":
         return redirect("/")
 
-    vehicles = Vehicle.query.order_by(
-        Vehicle.created_at.desc()
+    vehicles = Vehicle.query.filter_by(
+        dealer_id=current_user.id
     ).all()
 
-    return render_template("admin.html", vehicles=vehicles)
-
-
-# ---------------------------------
-# IMAGE HELPER
-# ---------------------------------
-
-def allowed_file(filename):
-
-    return "." in filename and (
-        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    return render_template(
+        "dealer.html",
+        vehicles=vehicles,
     )
 
 
-# ---------------------------------
-# ADD VEHICLE
-# ---------------------------------
-
-@app.route("/admin/add", methods=["POST"])
+@app.route("/dealer/add", methods=["POST"])
 @login_required
-def add_vehicle():
+def dealer_add():
 
-    if not current_user.is_admin:
+    if current_user.role != "dealer":
         return redirect("/")
 
-    image_url = None
+    file = request.files["image"]
 
-    if "image" in request.files:
+    filename = secure_filename(file.filename)
+    path = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        filename,
+    )
 
-        file = request.files["image"]
-
-        if file and allowed_file(file.filename):
-
-            filename = secure_filename(file.filename)
-
-            path = os.path.join(
-                app.config["UPLOAD_FOLDER"],
-                filename,
-            )
-
-            file.save(path)
-
-            image_url = f"/static/uploads/{filename}"
+    file.save(path)
 
     v = Vehicle(
         title=request.form["title"],
         price=int(request.form["price"]),
         year=int(request.form["year"]),
         mileage=int(request.form["mileage"]),
-        image_url=image_url,
+        image_url=f"/static/uploads/{filename}",
+        dealer_id=current_user.id,
     )
 
     db.session.add(v)
     db.session.commit()
 
-    return redirect("/admin")
+    return redirect("/dealer")
 
 
-# ---------------------------------
-# DELETE
-# ---------------------------------
+# ---------------- ADMIN PANEL ----------------
 
-@app.route("/admin/delete/<int:id>")
+@app.route("/admin")
 @login_required
-def delete_vehicle(id):
+def admin():
 
-    if not current_user.is_admin:
+    if current_user.role != "admin":
+        return redirect("/")
+
+    vehicles = Vehicle.query.filter_by(
+        is_approved=False
+    ).all()
+
+    dealers = User.query.filter_by(
+        role="dealer"
+    ).all()
+
+    return render_template(
+        "admin.html",
+        vehicles=vehicles,
+        dealers=dealers,
+    )
+
+
+@app.route("/admin/approve/<int:id>")
+@login_required
+def approve_vehicle(id):
+
+    if current_user.role != "admin":
         return redirect("/")
 
     v = Vehicle.query.get_or_404(id)
-
-    db.session.delete(v)
-    db.session.commit()
-
-    return redirect("/admin")
-
-
-# ---------------------------------
-# CSV BULK UPLOAD
-# ---------------------------------
-
-@app.route("/admin/upload-csv", methods=["POST"])
-@login_required
-def upload_csv():
-
-    if not current_user.is_admin:
-        return redirect("/")
-
-    file = request.files["csv"]
-
-    stream = file.stream.read().decode("utf-8").splitlines()
-
-    reader = csv.DictReader(stream)
-
-    for row in reader:
-
-        v = Vehicle(
-            title=row["title"],
-            price=int(row["price"]),
-            year=int(row["year"]),
-            mileage=int(row["mileage"]),
-            image_url=row.get("image_url"),
-        )
-
-        db.session.add(v)
+    v.is_approved = True
 
     db.session.commit()
 
