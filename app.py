@@ -59,6 +59,21 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
+    # 🔥 AUTO CREATE ADMIN IF NONE EXISTS
+    if not User.query.filter_by(role="admin").first():
+
+        admin_email = os.environ.get("ADMIN_EMAIL")
+        admin_password = os.environ.get("ADMIN_PASSWORD")
+
+        if admin_email and admin_password:
+            admin = User(
+                email=admin_email,
+                password_hash=generate_password_hash(admin_password),
+                role="admin",
+            )
+            db.session.add(admin)
+            db.session.commit()
+
 
 # ---------------- HOME ----------------
 
@@ -173,6 +188,7 @@ def dealer_add():
         mileage=int(request.form["mileage"]),
         image_url=f"/static/uploads/{filename}",
         dealer_id=current_user.id,
+        is_approved=False,
     )
 
     db.session.add(v)
@@ -190,7 +206,7 @@ def admin():
     if current_user.role != "admin":
         return redirect("/")
 
-    vehicles = Vehicle.query.filter_by(
+    pending = Vehicle.query.filter_by(
         is_approved=False
     ).all()
 
@@ -200,7 +216,7 @@ def admin():
 
     return render_template(
         "admin.html",
-        vehicles=vehicles,
+        vehicles=pending,
         dealers=dealers,
     )
 
@@ -214,7 +230,20 @@ def approve_vehicle(id):
 
     v = Vehicle.query.get_or_404(id)
     v.is_approved = True
+    db.session.commit()
 
+    return redirect("/admin")
+
+
+@app.route("/admin/promote/<int:id>")
+@login_required
+def promote_dealer(id):
+
+    if current_user.role != "admin":
+        return redirect("/")
+
+    user = User.query.get_or_404(id)
+    user.role = "admin"
     db.session.commit()
 
     return redirect("/admin")
