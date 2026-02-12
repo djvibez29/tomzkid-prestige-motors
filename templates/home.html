@@ -1,61 +1,37 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="page-title">Find Your Next Car</h1>
-
-<form class="filters">
-
-<input name="q" placeholder="Search..." value="{{ request.args.q }}">
-
-<input name="min_price" placeholder="Min price">
-
-<input name="max_price" placeholder="Max price">
-
-<input name="year" placeholder="Year">
-
-<button>Search</button>
-
-</form>
-
+<h1>Latest Approved Vehicles</h1>
 
 <div class="grid">
 
-{% for v in vehicles %}
+{% for vehicle in vehicles %}
 
 <div class="card">
 
-<a href="/vehicle/{{ v.id }}">
-<img src="{{ v.image_url }}">
-</a>
+    {% if vehicle.image_url %}
+        <img src="{{ vehicle.image_url }}" class="card-img">
+    {% endif %}
 
-<h3>{{ v.title }}</h3>
+    <div class="card-body">
+        <h3>{{ vehicle.title }}</h3>
 
-<p class="price">${{ "{:,}".format(v.price) }}</p>
+        <p class="price">
+            ${{ "{:,}".format(vehicle.price) }}
+        </p>
 
-<a href="/vehicle/{{ v.id }}">View</a>
-
-{% if current_user.is_authenticated %}
-<a href="/favorite/{{ v.id }}">❤️</a>
-{% endif %}
+        <p>
+            {{ vehicle.year }} • {{ vehicle.mileage }} miles
+        </p>
+    </div>
 
 </div>
+
+{% else %}
+
+<p>No vehicles available yet.</p>
 
 {% endfor %}
-
-</div>
-
-
-<div class="pagination">
-
-{% if pagination.has_prev %}
-<a href="?page={{ pagination.prev_num }}">Prev</a>
-{% endif %}
-
-<span>{{ pagination.page }}/{{ pagination.pages }}</span>
-
-{% if pagination.has_next %}
-<a href="?page={{ pagination.next_num }}">Next</a>
-{% endif %}
 
 </div>
 
