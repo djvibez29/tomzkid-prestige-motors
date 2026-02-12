@@ -27,7 +27,6 @@ from models import User, Vehicle
 # ---------------- CONFIG ----------------
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -36,7 +35,6 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
 db_url = os.environ.get("DATABASE_URL")
-
 if db_url and db_url.startswith("postgres://"):
     db_url = db_url.replace("postgres://", "postgresql://", 1)
 
@@ -59,14 +57,12 @@ def load_user(user_id):
 with app.app_context():
     db.create_all()
 
-    # 🔥 FORCE ADMIN CREATION / PROMOTION
     ADMIN_EMAIL = "tomzkidprestigegroups@gmail.com"
     ADMIN_PASSWORD = "OGTomzkid 29"
 
     admin = User.query.filter_by(email=ADMIN_EMAIL).first()
 
     if not admin:
-        # Create admin if not exists
         admin = User(
             email=ADMIN_EMAIL,
             password_hash=generate_password_hash(ADMIN_PASSWORD),
@@ -74,9 +70,7 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
-
     else:
-        # Promote if exists but not admin
         if admin.role != "admin":
             admin.role = "admin"
             db.session.commit()
@@ -94,29 +88,6 @@ def home():
     ).all()
 
     return render_template("home.html", vehicles=vehicles)
-
-
-# ---------------- REGISTER DEALER ----------------
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-
-    if request.method == "POST":
-
-        user = User(
-            email=request.form["email"],
-            password_hash=generate_password_hash(
-                request.form["password"]
-            ),
-            role="dealer",
-        )
-
-        db.session.add(user)
-        db.session.commit()
-
-        return redirect("/login")
-
-    return render_template("register.html")
 
 
 # ---------------- LOGIN ----------------
@@ -152,58 +123,6 @@ def logout():
     return redirect("/")
 
 
-# ---------------- DEALER DASHBOARD ----------------
-
-@app.route("/dealer")
-@login_required
-def dealer_dashboard():
-
-    if current_user.role != "dealer":
-        return redirect("/")
-
-    vehicles = Vehicle.query.filter_by(
-        dealer_id=current_user.id
-    ).all()
-
-    return render_template(
-        "dealer.html",
-        vehicles=vehicles,
-    )
-
-
-@app.route("/dealer/add", methods=["POST"])
-@login_required
-def dealer_add():
-
-    if current_user.role != "dealer":
-        return redirect("/")
-
-    file = request.files["image"]
-
-    filename = secure_filename(file.filename)
-    path = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        filename,
-    )
-
-    file.save(path)
-
-    v = Vehicle(
-        title=request.form["title"],
-        price=int(request.form["price"]),
-        year=int(request.form["year"]),
-        mileage=int(request.form["mileage"]),
-        image_url=f"/static/uploads/{filename}",
-        dealer_id=current_user.id,
-        is_approved=False,
-    )
-
-    db.session.add(v)
-    db.session.commit()
-
-    return redirect("/dealer")
-
-
 # ---------------- ADMIN PANEL ----------------
 
 @app.route("/admin")
@@ -213,44 +132,43 @@ def admin():
     if current_user.role != "admin":
         return redirect("/")
 
-    pending = Vehicle.query.filter_by(
-        is_approved=False
+    vehicles = Vehicle.query.order_by(
+        Vehicle.created_at.desc()
     ).all()
 
-    dealers = User.query.filter_by(
-        role="dealer"
-    ).all()
+    return render_template("admin.html", vehicles=vehicles)
 
-    return render_template(
-        "admin.html",
-        vehicles=pending,
-        dealers=dealers,
+
+# 🔥 FIXED ADMIN ADD ROUTE (THIS WAS MISSING)
+
+@app.route("/admin/add", methods=["POST"])
+@login_required
+def admin_add():
+
+    if current_user.role != "admin":
+        return redirect("/")
+
+    file = request.files.get("image")
+
+    image_url = None
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+        image_url = f"/static/uploads/{filename}"
+
+    vehicle = Vehicle(
+        title=request.form["title"],
+        price=int(request.form["price"]),
+        year=int(request.form["year"]),
+        mileage=int(request.form["mileage"]),
+        image_url=image_url,
+        dealer_id=current_user.id,
+        is_approved=True,  # Admin uploads auto-approved
     )
 
-
-@app.route("/admin/approve/<int:id>")
-@login_required
-def approve_vehicle(id):
-
-    if current_user.role != "admin":
-        return redirect("/")
-
-    v = Vehicle.query.get_or_404(id)
-    v.is_approved = True
-    db.session.commit()
-
-    return redirect("/admin")
-
-
-@app.route("/admin/promote/<int:id>")
-@login_required
-def promote_user(id):
-
-    if current_user.role != "admin":
-        return redirect("/")
-
-    user = User.query.get_or_404(id)
-    user.role = "admin"
+    db.session.add(vehicle)
     db.session.commit()
 
     return redirect("/admin")
