@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Your Wishlist</h2>
+
+<div class="grid">
+
+{% for item in items %}
+<a href="/vehicle/{{ item.vehicle.id }}">
+    <img src="{{ item.vehicle.image_url }}">
+    <h3>{{ item.vehicle.brand }} {{ item.vehicle.model }}</h3>
+    <p>${{ item.vehicle.price }}</p>
+</a>
+{% endfor %}
+
+</div>
+
+{% endblock %}
