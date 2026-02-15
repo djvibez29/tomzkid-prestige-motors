@@ -2,23 +2,55 @@
 
 {% block content %}
 
-<h2>Available Vehicles</h2>
+<h2>Global Marketplace</h2>
+
+<form method="GET">
+
+    <input type="text" name="search" placeholder="Search brand or model">
+
+    <input type="number" name="min_price" placeholder="Min Price">
+
+    <input type="number" name="max_price" placeholder="Max Price">
+
+    <button type="submit">Search</button>
+
+</form>
 
 <div class="vehicle-grid">
-    {% for vehicle in vehicles %}
-        <a href="/vehicle/{{ vehicle.id }}" class="vehicle-card">
 
-            {% if vehicle.image_url %}
-                <img src="{{ vehicle.image_url }}" class="vehicle-img">
-            {% endif %}
+{% for vehicle in vehicles.items %}
 
-            <h3>{{ vehicle.title }}</h3>
+<a href="/vehicle/{{ vehicle.id }}" class="vehicle-card">
 
-            <p>₦{{ "{:,}".format(vehicle.price) }}</p>
-            <p>{{ vehicle.year }} • {{ "{:,}".format(vehicle.mileage) }} km</p>
+    {% if vehicle.image_url %}
+        <img src="{{ vehicle.image_url }}" class="vehicle-img">
+    {% endif %}
 
-        </a>
-    {% endfor %}
+    <h3>{{ vehicle.brand }} {{ vehicle.model }}</h3>
+
+    <p>${{ "{:,}".format(vehicle.price) }}</p>
+
+    <p>{{ vehicle.year }}</p>
+
+</a>
+
+{% endfor %}
+
+</div>
+
+
+<div class="pagination">
+
+{% if vehicles.has_prev %}
+<a href="?page={{ vehicles.prev_num }}">Prev</a>
+{% endif %}
+
+Page {{ vehicles.page }} of {{ vehicles.pages }}
+
+{% if vehicles.has_next %}
+<a href="?page={{ vehicles.next_num }}">Next</a>
+{% endif %}
+
 </div>
 
 {% endblock %}
