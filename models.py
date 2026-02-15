@@ -1,5 +1,6 @@
 from extensions import db
 from flask_login import UserMixin
+from datetime import datetime
 
 
 class User(db.Model, UserMixin):
@@ -7,34 +8,39 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
 
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
 
-    role = db.Column(db.String(20), default="user")
-    # roles: user, dealer, admin
+    password_hash = db.Column(db.String(200), nullable=False)
 
-    vehicles = db.relationship("Vehicle", backref="dealer")
+    role = db.Column(db.String(20), default="dealer")
 
 
 class Vehicle(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    title = db.Column(db.String(200), nullable=False)
-    price = db.Column(db.Integer, nullable=False)
+    brand = db.Column(db.String(50))
+    model = db.Column(db.String(50))
+    trim = db.Column(db.String(50))
+
+    price = db.Column(db.Integer)
 
     year = db.Column(db.Integer)
     mileage = db.Column(db.Integer)
 
-    image_url = db.Column(db.String(400))
+    transmission = db.Column(db.String(20))
+    drivetrain = db.Column(db.String(20))
+    body_style = db.Column(db.String(20))
+
+    engine_type = db.Column(db.String(50))
+    engine_layout = db.Column(db.String(10))
+
+    interior_color = db.Column(db.String(30))
+    exterior_color = db.Column(db.String(30))
+
+    image_url = db.Column(db.String(300))
 
     is_approved = db.Column(db.Boolean, default=False)
 
-    dealer_id = db.Column(
-        db.Integer,
-        db.ForeignKey("user.id"),
-    )
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    created_at = db.Column(
-        db.DateTime,
-        server_default=db.func.now(),
-    )
+    dealer_id = db.Column(db.Integer, db.ForeignKey("user.id"))
