@@ -2,30 +2,21 @@
 
 {% block content %}
 
-<div class="vehicle-detail">
+<h1>{{ vehicle.brand }} {{ vehicle.model }} {{ vehicle.trim }}</h1>
 
-    <div class="vehicle-image-section">
-        {% if vehicle.image_url %}
-            <img src="{{ vehicle.image_url }}" class="detail-image">
-        {% endif %}
-    </div>
+<h2>${{ "{:,}".format(vehicle.price) }}</h2>
 
-    <div class="vehicle-info-section">
+<p>Year: {{ vehicle.year }}</p>
+<p>Mileage: {{ vehicle.mileage }}</p>
 
-        <h1>{{ vehicle.title }}</h1>
+<p>Transmission: {{ vehicle.transmission }}</p>
+<p>Drivetrain: {{ vehicle.drivetrain }}</p>
+<p>Body Style: {{ vehicle.body_style }}</p>
 
-        <h2>₦{{ "{:,}".format(vehicle.price) }}</h2>
+<p>Engine: {{ vehicle.engine_type }}</p>
+<p>Layout: {{ vehicle.engine_layout }}</p>
 
-        <p><strong>Year:</strong> {{ vehicle.year }}</p>
-        <p><strong>Mileage:</strong> {{ "{:,}".format(vehicle.mileage) }} km</p>
-
-        <hr>
-
-        <h3>Dealer Information</h3>
-        <p>{{ dealer.email }}</p>
-
-    </div>
-
-</div>
+<p>Exterior Color: {{ vehicle.exterior_color }}</p>
+<p>Interior Color: {{ vehicle.interior_color }}</p>
 
 {% endblock %}
