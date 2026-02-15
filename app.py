@@ -1,11 +1,13 @@
 import os
 from werkzeug.utils import secure_filename
+from sqlalchemy import or_
 
 from flask import (
     Flask,
     render_template,
     redirect,
     request,
+    url_for,
 )
 
 from flask_login import (
@@ -76,16 +78,36 @@ with app.app_context():
             db.session.commit()
 
 
-# ---------------- HOME ----------------
+# ---------------- HOME (SEARCH + FILTER + PAGINATION) ----------------
 
 @app.route("/")
 def home():
 
-    vehicles = Vehicle.query.filter_by(
-        is_approved=True
-    ).order_by(
+    search = request.args.get("search", "")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+    page = request.args.get("page", 1, type=int)
+
+    query = Vehicle.query.filter_by(is_approved=True)
+
+    if search:
+        query = query.filter(
+            or_(
+                Vehicle.brand.ilike(f"%{search}%"),
+                Vehicle.model.ilike(f"%{search}%"),
+                Vehicle.title.ilike(f"%{search}%"),
+            )
+        )
+
+    if min_price:
+        query = query.filter(Vehicle.price >= int(min_price))
+
+    if max_price:
+        query = query.filter(Vehicle.price <= int(max_price))
+
+    vehicles = query.order_by(
         Vehicle.created_at.desc()
-    ).all()
+    ).paginate(page=page, per_page=12)
 
     return render_template("home.html", vehicles=vehicles)
 
@@ -132,6 +154,8 @@ def login():
             if user.role == "dealer":
                 return redirect("/dealer")
 
+            return redirect("/")
+
     return render_template("login.html")
 
 
@@ -142,7 +166,7 @@ def logout():
     return redirect("/")
 
 
-# ---------------- ADMIN ----------------
+# ---------------- ADMIN PANEL ----------------
 
 @app.route("/admin")
 @login_required
@@ -176,10 +200,29 @@ def admin_add():
         image_url = f"/static/uploads/{filename}"
 
     vehicle = Vehicle(
-        title=request.form["title"],
-        price=int(request.form["price"]),
-        year=int(request.form["year"]),
-        mileage=int(request.form["mileage"]),
+
+        # NEW GLOBAL MARKETPLACE FIELDS
+        brand=request.form.get("brand"),
+        model=request.form.get("model"),
+        trim=request.form.get("trim"),
+
+        price=int(request.form.get("price")),
+        year=int(request.form.get("year")),
+        mileage=int(request.form.get("mileage")),
+
+        transmission=request.form.get("transmission"),
+        drivetrain=request.form.get("drivetrain"),
+        body_style=request.form.get("body_style"),
+
+        engine_type=request.form.get("engine_type"),
+        engine_layout=request.form.get("engine_layout"),
+
+        interior_color=request.form.get("interior_color"),
+        exterior_color=request.form.get("exterior_color"),
+
+        # BACKWARD COMPATIBILITY
+        title=request.form.get("title"),
+
         image_url=image_url,
         dealer_id=current_user.id,
         is_approved=True,
@@ -189,3 +232,94 @@ def admin_add():
     db.session.commit()
 
     return redirect("/admin")
+
+
+# ---------------- DEALER DASHBOARD ----------------
+
+@app.route("/dealer")
+@login_required
+def dealer():
+
+    if current_user.role != "dealer":
+        return redirect("/")
+
+    vehicles = Vehicle.query.filter_by(
+        dealer_id=current_user.id
+    ).order_by(
+        Vehicle.created_at.desc()
+    ).all()
+
+    return render_template("dealer.html", vehicles=vehicles)
+
+
+@app.route("/dealer/add", methods=["POST"])
+@login_required
+def dealer_add():
+
+    if current_user.role != "dealer":
+        return redirect("/")
+
+    file = request.files.get("image")
+
+    image_url = None
+
+    if file and file.filename != "":
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
+        image_url = f"/static/uploads/{filename}"
+
+    vehicle = Vehicle(
+
+        brand=request.form.get("brand"),
+        model=request.form.get("model"),
+        trim=request.form.get("trim"),
+
+        price=int(request.form.get("price")),
+        year=int(request.form.get("year")),
+        mileage=int(request.form.get("mileage")),
+
+        transmission=request.form.get("transmission"),
+        drivetrain=request.form.get("drivetrain"),
+        body_style=request.form.get("body_style"),
+
+        engine_type=request.form.get("engine_type"),
+        engine_layout=request.form.get("engine_layout"),
+
+        interior_color=request.form.get("interior_color"),
+        exterior_color=request.form.get("exterior_color"),
+
+        title=request.form.get("title"),
+
+        image_url=image_url,
+        dealer_id=current_user.id,
+        is_approved=False,
+    )
+
+    db.session.add(vehicle)
+    db.session.commit()
+
+    return redirect("/dealer")
+
+
+# ---------------- APPROVE VEHICLE ----------------
+
+@app.route("/admin/approve/<int:id>")
+@login_required
+def approve_vehicle(id):
+
+    if current_user.role != "admin":
+        return redirect("/")
+
+    vehicle = Vehicle.query.get_or_404(id)
+    vehicle.is_approved = True
+
+    db.session.commit()
+
+    return redirect("/admin")
+
+
+# ---------------- RUN ----------------
+
+if __name__ == "__main__":
+    app.run(debug=True)
