@@ -90,6 +90,25 @@ def home():
     return render_template("home.html", vehicles=vehicles)
 
 
+# ---------------- VEHICLE DETAIL ----------------
+
+@app.route("/vehicle/<int:id>")
+def vehicle_detail(id):
+
+    vehicle = Vehicle.query.get_or_404(id)
+
+    if not vehicle.is_approved:
+        return redirect("/")
+
+    dealer = User.query.get(vehicle.dealer_id)
+
+    return render_template(
+        "vehicle_detail.html",
+        vehicle=vehicle,
+        dealer=dealer,
+    )
+
+
 # ---------------- LOGIN ----------------
 
 @app.route("/login", methods=["GET", "POST"])
@@ -123,7 +142,7 @@ def logout():
     return redirect("/")
 
 
-# ---------------- ADMIN PANEL ----------------
+# ---------------- ADMIN ----------------
 
 @app.route("/admin")
 @login_required
@@ -138,8 +157,6 @@ def admin():
 
     return render_template("admin.html", vehicles=vehicles)
 
-
-# 🔥 FIXED ADMIN ADD ROUTE (THIS WAS MISSING)
 
 @app.route("/admin/add", methods=["POST"])
 @login_required
@@ -165,7 +182,7 @@ def admin_add():
         mileage=int(request.form["mileage"]),
         image_url=image_url,
         dealer_id=current_user.id,
-        is_approved=True,  # Admin uploads auto-approved
+        is_approved=True,
     )
 
     db.session.add(vehicle)
