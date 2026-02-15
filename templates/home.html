@@ -1,38 +1,24 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<h1>Latest Approved Vehicles</h1>
+<h2>Available Vehicles</h2>
 
-<div class="grid">
+<div class="vehicle-grid">
+    {% for vehicle in vehicles %}
+        <a href="/vehicle/{{ vehicle.id }}" class="vehicle-card">
 
-{% for vehicle in vehicles %}
+            {% if vehicle.image_url %}
+                <img src="{{ vehicle.image_url }}" class="vehicle-img">
+            {% endif %}
 
-<div class="card">
+            <h3>{{ vehicle.title }}</h3>
 
-    {% if vehicle.image_url %}
-        <img src="{{ vehicle.image_url }}" class="card-img">
-    {% endif %}
+            <p>₦{{ "{:,}".format(vehicle.price) }}</p>
+            <p>{{ vehicle.year }} • {{ "{:,}".format(vehicle.mileage) }} km</p>
 
-    <div class="card-body">
-        <h3>{{ vehicle.title }}</h3>
-
-        <p class="price">
-            ${{ "{:,}".format(vehicle.price) }}
-        </p>
-
-        <p>
-            {{ vehicle.year }} • {{ vehicle.mileage }} miles
-        </p>
-    </div>
-
-</div>
-
-{% else %}
-
-<p>No vehicles available yet.</p>
-
-{% endfor %}
-
+        </a>
+    {% endfor %}
 </div>
 
 {% endblock %}
