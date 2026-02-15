@@ -1,23 +1,30 @@
 {% extends "base.html" %}
+
 {% block content %}
 
-<div class="detail">
+<div class="vehicle-detail">
 
-<img src="{{ vehicle.image_url }}">
+    <div class="vehicle-image-section">
+        {% if vehicle.image_url %}
+            <img src="{{ vehicle.image_url }}" class="detail-image">
+        {% endif %}
+    </div>
 
-<div>
+    <div class="vehicle-info-section">
 
-<h1>{{ vehicle.title }}</h1>
+        <h1>{{ vehicle.title }}</h1>
 
-<p class="price">${{ "{:,}".format(vehicle.price) }}</p>
+        <h2>₦{{ "{:,}".format(vehicle.price) }}</h2>
 
-<p>{{ vehicle.year }} • {{ vehicle.mileage }}km</p>
+        <p><strong>Year:</strong> {{ vehicle.year }}</p>
+        <p><strong>Mileage:</strong> {{ "{:,}".format(vehicle.mileage) }} km</p>
 
-{% if current_user.is_authenticated %}
-<a href="/favorite/{{ vehicle.id }}">Save ❤️</a>
-{% endif %}
+        <hr>
 
-</div>
+        <h3>Dealer Information</h3>
+        <p>{{ dealer.email }}</p>
+
+    </div>
 
 </div>
 
