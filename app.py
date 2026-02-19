@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, request, url_for
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from extensions import db, login_manager
-from models import User, Vehicle, Order
+from models import User, Vehicle, Wishlist, Order
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
