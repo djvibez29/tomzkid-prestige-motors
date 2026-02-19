@@ -1,75 +1,45 @@
-{% extends "base.html" %}
-{% block content %}
+<h1>ADMIN DASHBOARD</h1>
 
-<h1>Admin Panel</h1>
+<h2>Total Revenue: ${{ revenue }}</h2>
 
 <hr>
 
 <h2>Add Vehicle</h2>
 
 <form method="POST" action="/admin/add" enctype="multipart/form-data">
-
-<input name="title" placeholder="Title" required>
-
-<input name="price" placeholder="Price" required>
-
-<input name="year" placeholder="Year">
-
-<input name="mileage" placeholder="Mileage">
-
-<input type="file" name="image">
-
-<button>Add Vehicle</button>
-
+  <input name="title" placeholder="Title" required>
+  <input name="price" placeholder="Price USD" required>
+  <input name="year" placeholder="Year">
+  <input name="mileage" placeholder="Mileage">
+  <input type="file" name="image">
+  <button type="submit">Add Vehicle</button>
 </form>
 
 <hr>
 
-<h2>Bulk Upload CSV</h2>
-
-<form method="POST" action="/admin/upload-csv" enctype="multipart/form-data">
-
-<input type="file" name="csv" required>
-
-<button>Upload CSV</button>
-
-</form>
-
-<hr>
-
-<h2>Current Inventory</h2>
-
-<table class="admin-table">
-
-<tr>
-<th>Image</th>
-<th>Title</th>
-<th>Price</th>
-<th>Delete</th>
-</tr>
+<h2>All Vehicles</h2>
 
 {% for v in vehicles %}
-
-<tr>
-
-<td>
-{% if v.image_url %}
-<img src="{{ v.image_url }}" width="120">
-{% endif %}
-</td>
-
-<td>{{ v.title }}</td>
-
-<td>${{ "{:,}".format(v.price) }}</td>
-
-<td>
-<a href="/admin/delete/{{ v.id }}">❌</a>
-</td>
-
-</tr>
-
+  <p>{{ v.title }} — ${{ v.price }}</p>
 {% endfor %}
 
-</table>
+<hr>
 
-{% endblock %}
+<h2>Orders</h2>
+
+{% for o in orders %}
+  <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+
+    <p><b>Car:</b> {{ o.vehicle.title }}</p>
+    <p><b>Buyer:</b> {{ o.buyer_email }}</p>
+    <p><b>Amount:</b> ${{ o.amount }}</p>
+    <p><b>Status:</b> {{ o.status }}</p>
+
+    {% if o.status != "paid" %}
+      <a href="/admin/order/{{ o.id }}/paid">
+        ✅ Mark as Paid
+      </a>
+    {% endif %}
+
+  </div>
+{% endfor %}
