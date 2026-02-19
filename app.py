@@ -1,23 +1,10 @@
 import os
 from werkzeug.utils import secure_filename
-from sqlalchemy import or_
-
-from flask import Flask, render_template, redirect, request, url_for, flash
-
-from flask_login import (
-    login_user,
-    logout_user,
-    login_required,
-    current_user,
-)
-
+from flask import Flask, render_template, redirect, request, url_for
+from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from extensions import db, login_manager
-from models import User, Vehicle, Wishlist
-
-
-# ---------------- CONFIG ----------------
+from models import User, Vehicle, Order
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
@@ -33,9 +20,6 @@ if db_url and db_url.startswith("postgres://"):
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///local.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-
-# ---------------- INIT ----------------
 
 db.init_app(app)
 login_manager.init_app(app)
@@ -59,154 +43,147 @@ with app.app_context():
             email=ADMIN_EMAIL,
             password_hash=generate_password_hash(ADMIN_PASSWORD),
             role="admin",
-            plan="pro",
         )
         db.session.add(admin)
         db.session.commit()
+    else:
+        admin.role = "admin"
+        db.session.commit()
 
 
-# ---------------- HOME ----------------
-
+# 🏠 HOME WITH SEARCH + PAGINATION
 @app.route("/")
 def home():
-
     search = request.args.get("search", "")
     page = request.args.get("page", 1, type=int)
 
     query = Vehicle.query.filter_by(is_approved=True)
 
     if search:
-        query = query.filter(
-            or_(
-                Vehicle.brand.ilike(f"%{search}%"),
-                Vehicle.model.ilike(f"%{search}%"),
-            )
-        )
+        query = query.filter(Vehicle.title.ilike(f"%{search}%"))
 
-    vehicles = query.order_by(
-        Vehicle.created_at.desc()
-    ).paginate(page=page, per_page=12)
+    vehicles = query.order_by(Vehicle.created_at.desc()).paginate(page=page, per_page=6)
 
     return render_template("home.html", vehicles=vehicles)
 
 
-# ---------------- VEHICLE DETAIL ----------------
-
+# 🚗 VEHICLE DETAIL
 @app.route("/vehicle/<int:id>")
 def vehicle_detail(id):
-
     vehicle = Vehicle.query.get_or_404(id)
-    dealer = User.query.get(vehicle.dealer_id)
-
-    return render_template("vehicle_detail.html", vehicle=vehicle, dealer=dealer)
-
-
-# ---------------- WISHLIST ----------------
-
-@app.route("/wishlist")
-@login_required
-def wishlist():
-
-    items = Wishlist.query.filter_by(user_id=current_user.id).all()
-    return render_template("wishlist.html", items=items)
-
-
-@app.route("/wishlist/add/<int:vehicle_id>")
-@login_required
-def add_to_wishlist(vehicle_id):
-
-    item = Wishlist(user_id=current_user.id, vehicle_id=vehicle_id)
-    db.session.add(item)
-    db.session.commit()
-
-    return redirect(request.referrer)
-
-
-# ---------------- DEALER DASHBOARD ----------------
-
-@app.route("/dealer")
-@login_required
-def dealer():
-
-    if current_user.role != "dealer":
+    if not vehicle.is_approved:
         return redirect("/")
 
-    vehicles = Vehicle.query.filter_by(dealer_id=current_user.id).all()
-    return render_template("dealer.html", vehicles=vehicles)
+    return render_template("vehicle_detail.html", vehicle=vehicle)
 
 
-@app.route("/dealer/add", methods=["POST"])
+# 🔐 LOGIN
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = User.query.filter_by(email=request.form["email"]).first()
+
+        if user and check_password_hash(user.password_hash, request.form["password"]):
+            login_user(user)
+
+            if user.role == "admin":
+                return redirect("/admin")
+
+    return render_template("login.html")
+
+
+@app.route("/logout")
 @login_required
-def dealer_add():
+def logout():
+    logout_user()
+    return redirect("/")
 
-    if current_user.plan == "free":
-        flash("Upgrade your plan to upload vehicles")
-        return redirect("/dealer")
+
+# 🛒 CHECKOUT
+@app.route("/checkout/<int:vehicle_id>", methods=["GET", "POST"])
+def checkout(vehicle_id):
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+    if request.method == "POST":
+        order = Order(
+            buyer_email=request.form["email"],
+            vehicle_id=vehicle.id,
+            amount=vehicle.price,
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        return render_template("payment_success.html", vehicle=vehicle)
+
+    return render_template("checkout.html", vehicle=vehicle)
+
+
+# 🧠 ADMIN PANEL
+@app.route("/admin")
+@login_required
+def admin():
+    if current_user.role != "admin":
+        return redirect("/")
+
+    vehicles = Vehicle.query.order_by(Vehicle.created_at.desc()).all()
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+
+    revenue = db.session.query(db.func.sum(Order.amount)).filter(Order.status == "paid").scalar() or 0
+
+    return render_template(
+        "admin.html",
+        vehicles=vehicles,
+        orders=orders,
+        revenue=revenue,
+    )
+
+
+# ➕ ADD VEHICLE
+@app.route("/admin/add", methods=["POST"])
+@login_required
+def admin_add():
+    if current_user.role != "admin":
+        return redirect("/")
 
     file = request.files.get("image")
-
     image_url = None
+
     if file and file.filename != "":
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(filepath)
         image_url = f"/static/uploads/{filename}"
 
     vehicle = Vehicle(
-        brand=request.form.get("brand"),
-        model=request.form.get("model"),
-        price=request.form.get("price"),
-        dealer_id=current_user.id,
+        title=request.form["title"],
+        price=int(request.form["price"]),
+        year=int(request.form["year"]),
+        mileage=int(request.form["mileage"]),
         image_url=image_url,
-        is_approved=False,
+        dealer_id=current_user.id,
+        is_approved=True,
     )
 
     db.session.add(vehicle)
     db.session.commit()
 
-    return redirect("/dealer")
+    return redirect("/admin")
 
 
-# ---------------- ADMIN PANEL ----------------
-
-@app.route("/admin")
+# ✅ MARK ORDER AS PAID (FOR TESTING PAYMENT)
+@app.route("/admin/order/<int:id>/paid")
 @login_required
-def admin():
-
+def mark_order_paid(id):
     if current_user.role != "admin":
         return redirect("/")
 
-    total_users = User.query.count()
-    total_dealers = User.query.filter_by(role="dealer").count()
-    total_vehicles = Vehicle.query.count()
-    pending = Vehicle.query.filter_by(is_approved=False).count()
-
-    vehicles = Vehicle.query.order_by(Vehicle.created_at.desc()).all()
-
-    return render_template(
-        "admin.html",
-        vehicles=vehicles,
-        total_users=total_users,
-        total_dealers=total_dealers,
-        total_vehicles=total_vehicles,
-        pending=pending,
-    )
-
-
-# ---------------- SUBSCRIPTION ----------------
-
-@app.route("/upgrade/<plan>")
-@login_required
-def upgrade(plan):
-
-    current_user.plan = plan
+    order = Order.query.get_or_404(id)
+    order.status = "paid"
     db.session.commit()
 
-    flash(f"You are now on {plan} plan")
+    return redirect("/admin")
 
-    return redirect("/dealer")
-
-
-# ---------------- RUN ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)
