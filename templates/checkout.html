@@ -1,0 +1,4 @@
+<h2>Checkout</h2>
+<p>{{ product.name }}</p>
+<p>${{ product.price }}</p>
+<a href="{{ url_for('payments.create_order', product_id=product.id) }}">Pay Now</a>
