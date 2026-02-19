@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from datetime import datetime
 
 
+# 👤 USERS
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(150), unique=True, nullable=False)
@@ -10,6 +11,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(50), default="user")
 
 
+# 🚗 VEHICLES
 class Vehicle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -27,6 +29,19 @@ class Vehicle(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+# ❤️ WISHLIST
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicle.id"))
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    vehicle = db.relationship("Vehicle")
+
+
+# 🛒 ORDERS (PAYMENTS)
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -38,6 +53,5 @@ class Order(db.Model):
     amount = db.Column(db.Integer, nullable=False)
 
     status = db.Column(db.String(50), default="pending")
-    # pending / paid / cancelled
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
