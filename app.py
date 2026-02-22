@@ -4,9 +4,11 @@ from werkzeug.utils import secure_filename
 
 import os
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+db_url = os.environ.get("DATABASE_URL")
 
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
+    
 from flask import (
     Flask, render_template, redirect,
     request, url_for, flash
