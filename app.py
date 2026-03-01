@@ -4,6 +4,10 @@ from werkzeug.utils import secure_filename
 
 import os
 
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+import os
 db_url = os.environ.get("DATABASE_URL")
 
 if db_url.startswith("postgres://"):
