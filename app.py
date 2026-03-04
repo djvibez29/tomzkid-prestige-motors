@@ -24,7 +24,6 @@ from models import User, Vehicle, Order
 # ---------------- APP CREATE ----------------
 
 app = Flask(__name__)
-
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
 
@@ -32,12 +31,21 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
 db_url = os.environ.get("DATABASE_URL")
 
-if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace(
-        "postgres://",
-        "postgresql+psycopg://",
-        1
-    )
+if db_url:
+    # Convert old Render format
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace(
+            "postgres://",
+            "postgresql+psycopg://",
+            1
+        )
+    # Convert standard postgres format
+    elif db_url.startswith("postgresql://"):
+        db_url = db_url.replace(
+            "postgresql://",
+            "postgresql+psycopg://",
+            1
+        )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///local.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -93,7 +101,6 @@ with app.app_context():
 
 @app.route("/")
 def home():
-
     vehicles = Vehicle.query.filter_by(
         is_approved=True
     ).order_by(
