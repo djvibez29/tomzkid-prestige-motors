@@ -2,17 +2,6 @@ import os
 import requests
 from werkzeug.utils import secure_filename
 
-import os
-
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-import os
-db_url = os.environ.get("DATABASE_URL")
-
-if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql+psycopg://", 1)
-    
 from flask import (
     Flask, render_template, redirect,
     request, url_for, flash
@@ -32,28 +21,43 @@ from extensions import db, login_manager
 from models import User, Vehicle, Order
 
 
-# ---------------- CONFIG ----------------
-
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# ---------------- APP CREATE ----------------
 
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 
+
+# ---------------- DATABASE ----------------
+
 db_url = os.environ.get("DATABASE_URL")
+
 if db_url and db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+    db_url = db_url.replace(
+        "postgres://",
+        "postgresql+psycopg://",
+        1
+    )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = db_url or "sqlite:///local.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+
+# ---------------- UPLOADS ----------------
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+
+# ---------------- PAYSTACK ----------------
 
 PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY")
 
 
-# ---------------- INIT ----------------
+# ---------------- INIT EXTENSIONS ----------------
 
 db.init_app(app)
 login_manager.init_app(app)
@@ -64,7 +68,10 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# ---------------- AUTO CREATE ADMIN ----------------
+
 with app.app_context():
+
     db.create_all()
 
     ADMIN_EMAIL = "tomzkidprestigegroups@gmail.com"
@@ -86,8 +93,12 @@ with app.app_context():
 
 @app.route("/")
 def home():
-    vehicles = Vehicle.query.filter_by(is_approved=True)\
-        .order_by(Vehicle.created_at.desc()).all()
+
+    vehicles = Vehicle.query.filter_by(
+        is_approved=True
+    ).order_by(
+        Vehicle.created_at.desc()
+    ).all()
 
     return render_template("home.html", vehicles=vehicles)
 
@@ -143,7 +154,7 @@ def logout():
     return redirect("/")
 
 
-# ---------------- BUY → PAYSTACK ----------------
+# ---------------- BUY VEHICLE ----------------
 
 @app.route("/buy/<int:vehicle_id>")
 @login_required
@@ -229,7 +240,7 @@ def dashboard():
     )
 
 
-# ---------------- ADMIN ----------------
+# ---------------- ADMIN PANEL ----------------
 
 @app.route("/admin")
 @login_required
@@ -263,7 +274,6 @@ def admin_add():
         return redirect("/")
 
     file = request.files.get("image")
-
     image_url = None
 
     if file and file.filename != "":
