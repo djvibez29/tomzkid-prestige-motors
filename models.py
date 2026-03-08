@@ -1,3 +1,4 @@
+# models.py
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -12,7 +13,7 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(20), default="user")  # admin, dealer, user
 
     vehicles = db.relationship("Vehicle", backref="dealer", lazy=True)
-    orders = db.relationship("Order", backref="buyer", lazy=True)
+    orders = db.relationship("Order", backref="buyer", lazy=True, foreign_keys="Order.buyer_id")
 
 
 class Vehicle(db.Model):
@@ -35,9 +36,10 @@ class VehicleImage(db.Model):
 
 
 class Order(db.Model):
-    __tablename__ = "orders"  # IMPORTANT: avoid 'order' reserved keyword
+    __tablename__ = "orders"
 
     id = db.Column(db.Integer, primary_key=True)
+    buyer_id = db.Column(db.Integer, db.ForeignKey("user.id"))  # LINK TO USER
     buyer_email = db.Column(db.String(120))
     vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicle.id"))
     amount = db.Column(db.Integer, nullable=False)
