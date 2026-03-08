@@ -17,6 +17,8 @@ from werkzeug.security import (
     generate_password_hash,
 )
 
+from sqlalchemy import text
+
 from extensions import db, login_manager
 from models import User, Vehicle, Order
 
@@ -83,11 +85,31 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# ---------------- AUTO CREATE ADMIN ----------------
+# ---------------- AUTO CREATE ADMIN + AUTO DB FIX ----------------
 
 with app.app_context():
 
     db.create_all()
+
+    # -------- AUTO FIX ORDER TABLE --------
+
+    try:
+        db.session.execute(
+            text('ALTER TABLE "order" ADD COLUMN commission INTEGER DEFAULT 0')
+        )
+        db.session.commit()
+    except:
+        pass
+
+    try:
+        db.session.execute(
+            text('ALTER TABLE "order" ADD COLUMN dealer_earnings INTEGER DEFAULT 0')
+        )
+        db.session.commit()
+    except:
+        pass
+
+    # -------- AUTO CREATE ADMIN --------
 
     ADMIN_EMAIL = "tomzkidprestigegroups@gmail.com"
     ADMIN_PASSWORD = "OGTomzkid 29"
@@ -106,7 +128,7 @@ with app.app_context():
         db.session.commit()
 
 
-# ---------------- HOME (EDMUNDS STYLE SEARCH) ----------------
+# ---------------- HOME (SEARCH + FILTER) ----------------
 
 @app.route("/")
 def home():
