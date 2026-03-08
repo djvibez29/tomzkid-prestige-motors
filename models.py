@@ -1,25 +1,19 @@
-from datetime import datetime
 from extensions import db
 from flask_login import UserMixin
+from sqlalchemy.dialects.postgresql import JSON
 
-# ---------------- USER ----------------
 class User(db.Model, UserMixin):
     __tablename__ = "user"
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
-    role = db.Column(db.String(20), default="user")  # user, dealer, admin
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(50), default="user")
 
+    # Relationships
     vehicles = db.relationship("Vehicle", backref="dealer", lazy=True)
-    orders = db.relationship(
-        "Order",
-        backref="buyer",
-        lazy=True,
-        foreign_keys="Order.buyer_id"  # important fix
-    )
+    orders = db.relationship("Order", backref="buyer", lazy=True)
 
-# ---------------- VEHICLE ----------------
 class Vehicle(db.Model):
     __tablename__ = "vehicle"
 
@@ -27,31 +21,22 @@ class Vehicle(db.Model):
     title = db.Column(db.String(200), nullable=False)
     price = db.Column(db.Integer, nullable=False)
     year = db.Column(db.Integer, nullable=False)
-    mileage = db.Column(db.Integer, nullable=True)
+    mileage = db.Column(db.Integer, nullable=False)
     description = db.Column(db.Text, nullable=True)
-
-    # Single image for now (can extend to multi-images below)
     image_url = db.Column(db.String(300), nullable=True)
-
-    # Optional: store multiple images as comma-separated URLs
-    images = db.Column(db.Text, nullable=True)
-
+    images = db.Column(JSON, nullable=True)
     is_approved = db.Column(db.Boolean, default=False)
     dealer_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-    orders = db.relationship("Order", backref="vehicle", lazy=True)
-
-# ---------------- ORDER ----------------
 class Order(db.Model):
-    __tablename__ = "orders"
+    __tablename__ = "order"
 
     id = db.Column(db.Integer, primary_key=True)
-    buyer_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)  # fix FK
-    buyer_email = db.Column(db.String(120), nullable=False)
+    buyer_email = db.Column(db.String(150), nullable=False)
     vehicle_id = db.Column(db.Integer, db.ForeignKey("vehicle.id"), nullable=False)
     amount = db.Column(db.Integer, nullable=False)
     commission = db.Column(db.Integer, default=0)
     dealer_earnings = db.Column(db.Integer, default=0)
-    status = db.Column(db.String(20), default="pending")  # pending, paid
+    status = db.Column(db.String(50), default="pending")
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    vehicle = db.relationship("Vehicle", backref="orders")
