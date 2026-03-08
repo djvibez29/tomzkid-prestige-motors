@@ -17,7 +17,7 @@ from werkzeug.security import (
     generate_password_hash,
 )
 
-from sqlalchemy import text
+from sqlalchemy import text, or_
 
 from extensions import db, login_manager
 from models import User, Vehicle, Order
@@ -91,8 +91,7 @@ with app.app_context():
 
     db.create_all()
 
-    # -------- AUTO FIX ORDER TABLE --------
-
+    # Fix missing columns
     try:
         db.session.execute(
             text('ALTER TABLE "order" ADD COLUMN commission INTEGER DEFAULT 0')
@@ -109,15 +108,12 @@ with app.app_context():
     except:
         pass
 
-    # -------- AUTO CREATE ADMIN --------
-
     ADMIN_EMAIL = "tomzkidprestigegroups@gmail.com"
     ADMIN_PASSWORD = "OGTomzkid 29"
 
     admin = User.query.filter_by(email=ADMIN_EMAIL).first()
 
     if not admin:
-
         admin = User(
             email=ADMIN_EMAIL,
             password_hash=generate_password_hash(ADMIN_PASSWORD),
@@ -139,7 +135,9 @@ def home():
     year = request.args.get("year")
     sort = request.args.get("sort")
 
-    query = Vehicle.query.filter_by(is_approved=True)
+    query = Vehicle.query.filter(
+        or_(Vehicle.is_approved == True, Vehicle.is_approved == None)
+    )
 
     if brand:
         query = query.filter(Vehicle.title.ilike(f"%{brand}%"))
@@ -164,10 +162,7 @@ def home():
 
     vehicles = query.all()
 
-    return render_template(
-        "home.html",
-        vehicles=vehicles
-    )
+    return render_template("home.html", vehicles=vehicles)
 
 
 # ---------------- VEHICLE DETAIL ----------------
@@ -177,7 +172,7 @@ def vehicle_detail(id):
 
     vehicle = Vehicle.query.get_or_404(id)
 
-    if not vehicle.is_approved:
+    if vehicle.is_approved is False:
         return redirect("/")
 
     dealer = User.query.get(vehicle.dealer_id)
@@ -234,7 +229,6 @@ def buy(vehicle_id):
     vehicle = Vehicle.query.get_or_404(vehicle_id)
 
     commission = int(vehicle.price * COMMISSION_PERCENT / 100)
-
     dealer_earnings = vehicle.price - commission
 
     order = Order(
@@ -313,10 +307,7 @@ def dashboard():
         buyer_email=current_user.email
     ).all()
 
-    return render_template(
-        "dashboard.html",
-        orders=orders
-    )
+    return render_template("dashboard.html", orders=orders)
 
 
 # ---------------- DEALER DASHBOARD ----------------
@@ -356,7 +347,7 @@ def admin():
     if current_user.role != "admin":
         return redirect("/")
 
-    vehicles = Vehicle.query.all()
+    vehicles = Vehicle.query.order_by(Vehicle.id.desc()).all()
 
     orders = Order.query.order_by(Order.id.desc()).all()
 
@@ -370,6 +361,46 @@ def admin():
         orders=orders,
         revenue=revenue
     )
+
+
+# ---------------- ADMIN APPROVE VEHICLE ----------------
+
+@app.route("/admin/approve/<int:id>")
+@login_required
+def approve_vehicle(id):
+
+    if current_user.role != "admin":
+        return redirect("/")
+
+    vehicle = Vehicle.query.get_or_404(id)
+
+    vehicle.is_approved = True
+
+    db.session.commit()
+
+    flash("Vehicle approved")
+
+    return redirect("/admin")
+
+
+# ---------------- ADMIN DELETE VEHICLE ----------------
+
+@app.route("/admin/delete/<int:id>")
+@login_required
+def delete_vehicle(id):
+
+    if current_user.role != "admin":
+        return redirect("/")
+
+    vehicle = Vehicle.query.get_or_404(id)
+
+    db.session.delete(vehicle)
+
+    db.session.commit()
+
+    flash("Vehicle deleted")
+
+    return redirect("/admin")
 
 
 # ---------------- ADMIN ADD VEHICLE ----------------
@@ -405,7 +436,7 @@ def admin_add():
         mileage=int(request.form["mileage"]),
         image_url=image_url,
         dealer_id=current_user.id,
-        is_approved=True,
+        is_approved=True
     )
 
     db.session.add(vehicle)
