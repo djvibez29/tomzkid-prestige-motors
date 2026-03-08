@@ -32,14 +32,14 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev")
 db_url = os.environ.get("DATABASE_URL")
 
 if db_url:
-    # Convert old Render format
+
     if db_url.startswith("postgres://"):
         db_url = db_url.replace(
             "postgres://",
             "postgresql+psycopg://",
             1
         )
-    # Convert standard postgres format
+
     elif db_url.startswith("postgresql://"):
         db_url = db_url.replace(
             "postgresql://",
@@ -54,7 +54,9 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # ---------------- UPLOADS ----------------
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static/uploads")
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -63,6 +65,11 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # ---------------- PAYSTACK ----------------
 
 PAYSTACK_SECRET = os.environ.get("PAYSTACK_SECRET_KEY")
+
+
+# ---------------- MARKETPLACE SETTINGS ----------------
+
+COMMISSION_PERCENT = 10
 
 
 # ---------------- INIT EXTENSIONS ----------------
@@ -88,11 +95,13 @@ with app.app_context():
     admin = User.query.filter_by(email=ADMIN_EMAIL).first()
 
     if not admin:
+
         admin = User(
             email=ADMIN_EMAIL,
             password_hash=generate_password_hash(ADMIN_PASSWORD),
             role="admin",
         )
+
         db.session.add(admin)
         db.session.commit()
 
@@ -101,10 +110,9 @@ with app.app_context():
 
 @app.route("/")
 def home():
+
     vehicles = Vehicle.query.filter_by(
         is_approved=True
-    ).order_by(
-        Vehicle.created_at.desc()
     ).all()
 
     return render_template("home.html", vehicles=vehicles)
@@ -144,10 +152,14 @@ def login():
             user.password_hash,
             request.form["password"],
         ):
+
             login_user(user)
 
             if user.role == "admin":
                 return redirect("/admin")
+
+            if user.role == "dealer":
+                return redirect("/dealer")
 
             return redirect("/dashboard")
 
@@ -169,10 +181,16 @@ def buy(vehicle_id):
 
     vehicle = Vehicle.query.get_or_404(vehicle_id)
 
+    commission = int(vehicle.price * COMMISSION_PERCENT / 100)
+
+    dealer_earnings = vehicle.price - commission
+
     order = Order(
         buyer_email=current_user.email,
         vehicle_id=vehicle.id,
         amount=vehicle.price,
+        commission=commission,
+        dealer_earnings=dealer_earnings,
         status="pending"
     )
 
@@ -223,7 +241,9 @@ def verify_payment(order_id):
     if res["data"]["status"] == "success":
 
         order = Order.query.get(order_id)
+
         order.status = "paid"
+
         db.session.commit()
 
         flash("Payment successful!", "success")
@@ -239,11 +259,39 @@ def dashboard():
 
     orders = Order.query.filter_by(
         buyer_email=current_user.email
-    ).order_by(Order.id.desc()).all()
+    ).all()
 
     return render_template(
         "dashboard.html",
         orders=orders
+    )
+
+
+# ---------------- DEALER DASHBOARD ----------------
+
+@app.route("/dealer")
+@login_required
+def dealer_dashboard():
+
+    if current_user.role != "dealer":
+        return redirect("/")
+
+    vehicles = Vehicle.query.filter_by(
+        dealer_id=current_user.id
+    ).all()
+
+    orders = Order.query.join(Vehicle).filter(
+        Vehicle.dealer_id == current_user.id,
+        Order.status == "paid"
+    ).all()
+
+    earnings = sum(o.dealer_earnings for o in orders)
+
+    return render_template(
+        "dealer_dashboard.html",
+        vehicles=vehicles,
+        orders=orders,
+        earnings=earnings
     )
 
 
@@ -257,10 +305,11 @@ def admin():
         return redirect("/")
 
     vehicles = Vehicle.query.all()
+
     orders = Order.query.order_by(Order.id.desc()).all()
 
     revenue = db.session.query(
-        db.func.sum(Order.amount)
+        db.func.sum(Order.commission)
     ).filter(Order.status == "paid").scalar() or 0
 
     return render_template(
@@ -281,15 +330,20 @@ def admin_add():
         return redirect("/")
 
     file = request.files.get("image")
+
     image_url = None
 
     if file and file.filename != "":
+
         filename = secure_filename(file.filename)
+
         filepath = os.path.join(
             app.config["UPLOAD_FOLDER"],
             filename
         )
+
         file.save(filepath)
+
         image_url = f"/static/uploads/{filename}"
 
     vehicle = Vehicle(
