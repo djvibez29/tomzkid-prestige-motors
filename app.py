@@ -106,16 +106,46 @@ with app.app_context():
         db.session.commit()
 
 
-# ---------------- HOME ----------------
+# ---------------- HOME (EDMUNDS STYLE SEARCH) ----------------
 
 @app.route("/")
 def home():
 
-    vehicles = Vehicle.query.filter_by(
-        is_approved=True
-    ).all()
+    brand = request.args.get("brand")
+    min_price = request.args.get("min_price")
+    max_price = request.args.get("max_price")
+    year = request.args.get("year")
+    sort = request.args.get("sort")
 
-    return render_template("home.html", vehicles=vehicles)
+    query = Vehicle.query.filter_by(is_approved=True)
+
+    if brand:
+        query = query.filter(Vehicle.title.ilike(f"%{brand}%"))
+
+    if min_price:
+        query = query.filter(Vehicle.price >= int(min_price))
+
+    if max_price:
+        query = query.filter(Vehicle.price <= int(max_price))
+
+    if year:
+        query = query.filter(Vehicle.year == int(year))
+
+    if sort == "price_low":
+        query = query.order_by(Vehicle.price.asc())
+
+    elif sort == "price_high":
+        query = query.order_by(Vehicle.price.desc())
+
+    elif sort == "newest":
+        query = query.order_by(Vehicle.year.desc())
+
+    vehicles = query.all()
+
+    return render_template(
+        "home.html",
+        vehicles=vehicles
+    )
 
 
 # ---------------- VEHICLE DETAIL ----------------
