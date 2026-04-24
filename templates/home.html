@@ -1,56 +1,24 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auto Marketplace</title>
+</head>
+<body>
 
-{% block content %}
+<h1>Cars for Sale</h1>
 
-<h2>Global Marketplace</h2>
+<a href="/add">Add Vehicle</a>
 
-<form method="GET">
+{% for car in vehicles %}
+    <div>
+        <h2>{{ car.title }}</h2>
+        <p>Price: {{ car.price }}</p>
 
-    <input type="text" name="search" placeholder="Search brand or model">
-
-    <input type="number" name="min_price" placeholder="Min Price">
-
-    <input type="number" name="max_price" placeholder="Max Price">
-
-    <button type="submit">Search</button>
-
-</form>
-
-<div class="vehicle-grid">
-
-{% for vehicle in vehicles.items %}
-
-<a href="/vehicle/{{ vehicle.id }}" class="vehicle-card">
-
-    {% if vehicle.image_url %}
-        <img src="{{ vehicle.image_url }}" class="vehicle-img">
-    {% endif %}
-
-    <h3>{{ vehicle.brand }} {{ vehicle.model }}</h3>
-
-    <p>${{ "{:,}".format(vehicle.price) }}</p>
-
-    <p>{{ vehicle.year }}</p>
-
-</a>
-
+        {% if car.image_url %}
+            <img src="{{ url_for('static', filename='uploads/' + car.image_url) }}" width="200">
+        {% endif %}
+    </div>
 {% endfor %}
 
-</div>
-
-
-<div class="pagination">
-
-{% if vehicles.has_prev %}
-<a href="?page={{ vehicles.prev_num }}">Prev</a>
-{% endif %}
-
-Page {{ vehicles.page }} of {{ vehicles.pages }}
-
-{% if vehicles.has_next %}
-<a href="?page={{ vehicles.next_num }}">Next</a>
-{% endif %}
-
-</div>
-
-{% endblock %}
+</body>
+</html>
